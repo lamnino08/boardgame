@@ -1,0 +1,7 @@
+{
+  "/graduate/letter/page": "app/graduate/letter/page.js",
+  "/graduate/memory/page": "app/graduate/memory/page.js",
+  "/graduate/game/page": "app/graduate/game/page.js",
+  "/graduate/message/page": "app/graduate/message/page.js",
+  "/graduate/event-detail/page": "app/graduate/event-detail/page.js"
+}

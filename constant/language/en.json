@@ -1,0 +1,143 @@
+{
+  "saving": "Saving...",
+  "button": {
+    "save": "Save",
+    "edit": "Edit",
+    "add": "Add",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "submit": "Submit",
+    "public": "Public"
+  },
+  "Loading": ".--./\/.,./",
+  "Sidebar": {
+    "Home": "Home",
+    "Search": "Discover",
+    "Create": "Create",
+    "Profile": "Profile",
+    "Settings": "Setting",
+    "Admin": "Admin",
+    "Board Talk": "Board Talk"
+  },
+  "Nav": {
+    "Search": "Search Games",
+    "UserDropdown": {
+      "Title": "Logged in as",
+      "Profile": "View Profile",
+      "Language": "Change Language",
+      "Logout": "Sign Out"
+    }
+  },
+  "boardgame": {
+    "createpage": {
+      "Title": "Contribute a New Board Game",
+      "short_title": "What is the name of your game? This will be visible to other players.",
+      "input": {
+        "name": {
+          "label": "Game Name",
+          "placeholder": "e.g., Brass Birmingham",
+          "description": "What would you like us to call your game?"
+        },
+        "BBGLink": {
+          "label": "BoardGameGeek URL",
+          "placeholder": "Provide a URL to quickly add game details.",
+          "description": "Provide a BBG link for quick game creation."
+        }
+      },
+      "button": {
+        "cancle": "Cancel",
+        "submit": "Proceed"
+      }
+    },
+    "updatepage": {
+      "title": "Board Game Configuration",
+      "short_title": "Fill in all the details below",
+      "no-content": "No information available",
+      "boardgame-detail": {
+        "title": "Board Game Details",
+        "name-card": {
+          "title": "Game Name",
+          "placeholder": "e.g., Brass Birmingham"
+        },
+        "link-card": {
+          "title": "BoardGameGeek Link",
+          "placeholder": "Enter the URL"
+        },
+        "shortcut-card": {
+          "title": "Game Summary",
+          "placeholder": "Provide a brief overview of your game."
+        },
+        "description-card": {
+          "title": "Detailed Description",
+          "placeholder": "Explain the rules, objectives, and gameplay of your game."
+        },
+        "number-players-card": {
+          "title": "Number of Players",
+          "min-description": "Minimum number of players required to play.",
+          "max-description": "Maximum number of players allowed in the game."
+        },
+        "duration-card": {
+          "title": "Game Duration (Minutes)",
+          "min-description": "Minimum time required for a game session.",
+          "max-description": "Maximum time allowed for a game session."
+        }
+      },
+      "boardgame-file": {
+        "rule-card": {
+          "title": "Game rules",
+          "title-placeholder": "Rule title",
+          "description-placeholder": "Author or short description",
+          "link-placeholder": "Add a link (e.g., https://example.com)",
+          "add": "Add a rule",
+          "upload-title": "Upload File or Add Link",
+          "upload": "Upload file",
+          "add-link": "Add link",
+          "choose-file": "Choose file",
+          "no-file-chosen": "No file chosen",
+          "support-format": "Supported formats: PDF, images (JPG, PNG)",
+          "no-rule": "No rule found"
+        },
+        "video-card": {
+          "title": "Video Tutorials",
+          "add": "Add a tutorial",
+          "edit": "Edit tutorial",
+          "delete": "Delete tutorial",
+          "no-video": "No video tutorials found",
+          "title-placeholder": "Enter tutorial title",
+          "language-placeholder": "Select a language",
+          "url-placeholder": "Add a video link (e.g., https://example.com)",
+          "description-placeholder": "Enter a description (optional)",
+          "success-add": "Tutorial added successfully",
+          "success-update": "Tutorial updated successfully",
+          "success-delete": "Tutorial deleted successfully",
+          "error-fetch": "Failed to fetch video tutorials",
+          "error-submit": "Failed to submit video tutorial"
+        },
+        "image-card": {
+          "title": "Game Images",
+          "delete": "Delete image",
+          "no-image": "No images found"
+        }
+      }
+    }
+  },
+  "admin": {
+    "category": {
+      "list": {
+        "title": "Categories",
+        "add": "Add category",
+        "search_placeholder": "Search categories",
+        "column": {
+          "name": "Name",
+          "description": "Description",
+          "status": "Status",
+          "game_count": "Games"
+        },
+        "action": "action"
+      },
+      "add_modal": {
+        "title": "Add New Category"
+      }
+    }
+  }
+}

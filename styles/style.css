@@ -1,0 +1,29 @@
+.loading-container {
+  display: flex;
+  justify-content: left;
+  align-items: center;
+  background-color: #1a1a1a00; /* Nền tối */
+  border-radius: 8px;
+  max-width: 400px; /* Chiều rộng tối đa */
+}
+
+.loading-wave {
+  font-weight: bold; 
+  color: transparent;
+  background-image: linear-gradient(90deg, black, white, black);
+  background-size: 200% auto; 
+  background-clip: text; 
+  -webkit-background-clip: text; 
+  animation: wave-animation 3s linear infinite; 
+  white-space: nowrap; 
+}
+
+@keyframes wave-animation {
+  0% {
+    background-position: 0% 50%; /* Gradient bắt đầu từ trái */
+  }
+  100% {
+    background-position: 200% 50%; /* Gradient di chuyển sang phải */
+  }
+}
+

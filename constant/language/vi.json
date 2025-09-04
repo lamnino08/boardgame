@@ -1,0 +1,40 @@
+{
+  "Sidebar": {
+    "Home": "Trang chủ",
+    "Search": "Tìm kiếm",
+    "Create": "Tạo mới",
+    "Profile": "Trang cá nhân",
+    "Settings": "Cài đặt"
+  },
+  "Nav": {
+    "Search": "Tìm kiếm",
+    "UserDropdown": {
+      "Title": "Đăng nhập với tư cách",
+      "Profile": "Trang cá nhân",
+      "Language": "Ngôn ngữ",
+      "Logout": "Đăng xuất"
+    }
+  },
+  "boardgame": {
+    "createpage": {
+      "Title": "Đóng góp trò chơi mới",
+      "short_title": "Bạn muốn đặt tên gì cho trò chơi của mình? Tên này sẽ hiển thị với mọi người.",
+      "input": {
+        "name": {
+          "label": "Tên trò chơi",
+          "placeholder": "ví dụ: Brass Birmingham",
+          "description": "Bạn muốn chúng tôi giới thiệu trò chơi của bạn như thế nào?"
+        },
+        "BBGLink": {
+          "label": "Liên kết BoardGameGeek",
+          "placeholder": "liên kết",
+          "description": "Bạn có thể nhanh chóng thêm trò chơi với BBG"
+        }
+      },
+      "button": {
+        "cancle": "Hủy",
+        "submit": "Tiếp tục"
+      }
+    }
+  }
+}

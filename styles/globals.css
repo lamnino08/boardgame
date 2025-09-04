@@ -1,0 +1,162 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Light Mode */
+:root {
+  /* Background colors */
+  --background: #f3f3f3 ;
+  --background-gradient: linear-gradient(135deg, #ffffff, #ffffff, #eeeeee);
+  --card: #e9e9e9;
+  --disabled: #bebebe;
+  --readonly: #e0e0e0;
+  --header: #24292f;
+  --hover-gradient: rgba(0, 0, 0, 0.1);
+  
+  /* Text colors */
+  --text-primary: #1F2328;
+  --text-secondary: #656D76;
+  --text-muted: #6E7781;  
+  --text-link: #0969DA;
+  --text-danger: #CF222E;
+  --text-success: #1A7F37;
+  --text-warning: #bb7d01;
+  --text-white: #ffffff;
+
+  /* Border colors */
+  --border: #a5a5a5;
+  --border-muted: #d8dee4;
+  --border-subtle: rgba(31, 35, 40, 0.15);
+
+  /* Button colors */
+  --btn-default-bg: #f6f8fa;
+  --btn-default-border: rgba(31, 35, 40, 0.15);
+  --btn-primary-bg: #2da44e;
+  --btn-danger-bg: #cf222e;
+  
+  /* Accent colors */
+  --primary: #313131;
+  --success: #2DA44E;
+  --danger: #CF222E;
+  --warning: #9A6700;
+  --muted: rgba(175, 184, 193, 0.2);
+
+  /* Font sizes */
+  --text-xs: 12px;
+  --text-sm: 14px;
+  --text-base: 16px;
+  --text-lg: 20px;
+  --text-xl: 24px;
+  --text-2xl: 32px;
+  --text-3xl: 40px;
+  --text-4xl: 48px;
+}
+
+/* Dark Mode */
+.dark {
+  /* Background colors */
+  --background: #202020;
+  --background-gradient: linear-gradient(135deg, #1f1f1f, #2a2a2a);
+  --card: rgba(40,40,40,0.70);
+  --disabled: #404040;
+  --readonly: #505050;
+  --header: #010409;
+  --hover-gradient: rgba(255, 255, 255, 0.1);
+  
+  /* Text colors */
+  --text-primary: #E6EDF3;
+  --text-secondary: #7D8590;
+  --text-muted: #848D97;
+  --text-link: #539BF5;
+  --text-danger: #F85149;
+  --text-success: #3FB950;
+  --text-warning: #D29922;
+  --text-white: #ffffff;
+
+  /* Border colors */
+  --border: #30363D;
+  --border-muted: #21262D;
+  --border-subtle: rgba(240, 246, 252, 0.1);
+
+  /* Button colors */
+  --btn-default-bg: #21262D;
+  --btn-default-border: rgba(240, 246, 252, 0.1);
+  --btn-primary-bg: #238636;
+  --btn-danger-bg: #da3633;
+
+  /* Accent colors */
+  --primary: #888888;
+  --success: #3FB950;
+  --danger: #F85149;
+  --warning: #D29922;
+  --muted: rgba(110, 118, 129, 0.4);
+}
+
+@layer components {
+  .form-label {
+    @apply absolute left-4 -top-6 text-sm text-text-primary;
+  }
+
+  .input-field {
+    @apply w-full rounded-xl border border-border bg-background text-text-primary
+  }
+}
+
+@layer base {
+  body {
+    background: var(--background-gradient); /* Thay vì @apply bg-[...] */
+    color: var(--text-primary);
+    font-size: var(--text-base);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1 {
+    @apply text-[var(--text-2xl)] font-semibold leading-[1.25];
+  }
+
+  h2 {
+    @apply text-[var(--text-xl)] font-semibold leading-[1.25];
+  }
+
+  h3 {
+    @apply text-[var(--text-lg)] font-semibold leading-[1.25];
+  }
+
+  a {
+    @apply text-[var(--text-link)] no-underline hover:underline;
+  }
+}
+
+::-webkit-scrollbar {
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #555;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: #777;
+}
+
+/* Animation for slide down effect */
+@keyframes slide-down {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+.animate-slide-down {
+  animation: slide-down 0.4s ease-out forwards;
+}
