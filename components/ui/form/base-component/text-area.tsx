@@ -1,5 +1,4 @@
-import React, { TextareaHTMLAttributes, useState } from 'react';
-import Card from '@/components/ui/Card';
+import React, { useState } from 'react';
 import { BaseInput } from '@/components/FormBuilder/types';
 
 type TextAreaSize = 'sm' | 'md' | 'lg';
