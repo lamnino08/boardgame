@@ -65,9 +65,7 @@ export const BadgeShowCase = () => {
         <Badge variant="info">Info</Badge>
         <Badge variant="warning">Warning</Badge>
         <Badge variant="danger">Danger</Badge>
-        <Badge variant="dark">Dark</Badge>
         <Badge variant="secondary">Secondary</Badge>
-        <Badge variant="light">Light</Badge>
         <Badge variant="outline">Outline</Badge>
       </div>
 
