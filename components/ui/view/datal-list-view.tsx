@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import Table, { Column } from '@/components/ui/view/table';
-import Card from '@/components/ui/Card';
+import {Card} from '@/components/ui/Card';
 import { TextInput } from '@/components/ui/form/base-component/text-input';
 import Button from '@/components/ui/common/button/button';
 import icons from '@/components/icons';
@@ -143,7 +143,7 @@ export function DataListView<T extends { id: number }>({
                                     className="w-full truncate"
                                     value={searchQuery}
                                     placeholder={header.search.placeholder || 'Search...'}
-                                    onChange={(e) => handleSearchChange(e.target.value)}
+                                    // onChange={(e) => handleSearchChange(e.target.value)}
                                 />
                             </div>
                         )}

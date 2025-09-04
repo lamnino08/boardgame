@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useRef } from 'react';
-import Card from '@/components/ui/Card';
+import {Card} from '@/components/ui/Card';
 import { TextInput } from '@/components/ui/form/base-component/text-input';
 import Dropdown from '@/components/ui/form/base-component/dropdown';
 import icons from '@/components/icons';
@@ -146,14 +146,14 @@ function Table<T>({
                           placeholder="All"
                           size="sm"
                           options={col.filter.filterOptions}
-                          onSelect={(val) => handleFilterChange(String(col.key), val)}
+                          // onSelect={(val) => handleFilterChange(String(col.key), val)}
                         />
                       ) : (
                         <TextInput
                           size="sm"
                           placeholder="Search"
                           value={filters[String(col.key)] || ''}
-                          onChange={(e) => handleFilterChange(String(col.key), e.target.value)}
+                          // onChange={(e) => handleFilterChange(String(col.key), e.target.value)}
                         />
                       )}
                     </>

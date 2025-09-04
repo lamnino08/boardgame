@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { CheckIcon, MinusIcon, DotIcon } from '@/components/icons';
-import Card from '../../Card';
+import {Card} from '../../Card';
 import { BaseInput } from '@/components/FormBuilder/types';
 
 interface CheckboxProps extends BaseInput<boolean> {

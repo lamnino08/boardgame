@@ -1,6 +1,6 @@
 import React, { useState, DragEvent, ChangeEvent } from 'react';
 import { ImageIcon, PdfIcon, VideoIcon, FileIcon, TrashIcon } from '@/components/icons'
-import Card from '@/components/ui/Card';
+import {Card} from '@/components/ui/Card';
 import { BaseInput } from '@/components/FormBuilder/types';
 
 interface FileInputProps extends BaseInput<File[]> {
