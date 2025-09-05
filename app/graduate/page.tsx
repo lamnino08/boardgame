@@ -21,18 +21,65 @@ export default function GraduationPage() {
   const [frameIndex, setFrameIndex] = useState(0);
   const [guestName, setGuestName] = useState("");
   const [confirmed, setConfirmed] = useState(false);
-  const [error, setError] = useState<string | null>(null); // Thêm state cho lỗi
+  const [error, setError] = useState<string | null>(null);
+  const [isNewGuest, setIsNewGuest] = useState(false); // Thêm state cho khách mới
 
   const inputRef = useRef<HTMLInputElement | null>(null);
   const router = useRouter();
   const searchParams = useSearchParams();
 
+  // Hàm lấy danh sách guest từ localStorage
+  const getGuestList = () => {
+    const stored = localStorage.getItem("guestList");
+    return stored ? JSON.parse(stored) : [];
+  };
+
+  // Hàm lưu danh sách guest vào localStorage
+  const saveGuestList = (guestList: Array<{link: string, name: string}>) => {
+    localStorage.setItem("guestList", JSON.stringify(guestList));
+  };
+
+  // Hàm lưu guestName hiện tại vào localStorage
+  const saveCurrentGuestName = (name: string) => {
+    localStorage.setItem("guestName", name);
+  };
+
+  // Hàm tìm guest theo link
+  const findGuestByLink = (link: string) => {
+    const guestList = getGuestList();
+    return guestList.find((guest: {link: string, name: string}) => guest.link === link);
+  };
+
   useEffect(() => {
     const nameFromUrl = searchParams.get("name");
     if (nameFromUrl) {
-      setGuestName(decodeURIComponent(nameFromUrl));
+      const decodedName = decodeURIComponent(nameFromUrl);
+      const currentLink = `graduate?name=${nameFromUrl}`;
+      
+      // Tìm guest trong danh sách
+      const existingGuest = findGuestByLink(currentLink);
+      
+      if (existingGuest) {
+        // Nếu đã có trong danh sách, set tên và chuyển sang letter
+        setGuestName(existingGuest.name);
+        saveCurrentGuestName(existingGuest.name);
+        router.replace("/graduate/letter");
+        return;
+      } else {
+        // Nếu chưa có, set tên từ URL và đánh dấu là khách mới
+        setGuestName(decodedName);
+        setIsNewGuest(true);
+      }
     }
-  }, [searchParams]);
+  }, [searchParams, router]);
+
+  useEffect(() => {
+    const guestList = getGuestList();
+    if (guestList.length > 0 && !searchParams.get("name")) {
+      // Nếu có danh sách guest nhưng không có params, chuyển sang letter
+      router.replace("/graduate/letter");
+    }
+  }, [router, searchParams]);
 
   useEffect(() => {
     if (step === "intro") {
@@ -75,31 +122,38 @@ export default function GraduationPage() {
     }
   }, [loading, confirmed]);
 
-  useEffect(() => {
-    if (confirmed && guestName.trim()) {
-      const name = guestName.trim();
-      if (name.length < 3) {
-        setError("Tên phải có ít nhất 3 ký tự.");
-        setConfirmed(false); // Reset confirmed state
-        return;
-      }
-
-      setError(null);
-      localStorage.setItem("guestName", name);
-      router.push(`/graduate/letter`);
-    }
-  }, [confirmed, guestName, router]);
+  // Logic này đã được chuyển vào handleConfirm
 
   // Hợp nhất logic xác nhận vào một hàm
   const handleConfirm = async () => {
     const trimmedName = guestName.trim();
     if (trimmedName.length >= 3) {
       setError(null);
-      console.log("herereeee");
       await confirmName({ name: trimmedName });
-      console.log("here111");
       setConfirmed(true);
-      router.replace(`/graduate/letter`);
+      
+      // Lưu vào danh sách guest
+      const guestList = getGuestList();
+      const nameFromUrl = searchParams.get("name");
+      const currentLink = nameFromUrl ? `graduate?name=${nameFromUrl}` : `graduate?name=${encodeURIComponent(trimmedName)}`;
+      
+      // Kiểm tra xem link đã tồn tại chưa
+      const existingIndex = guestList.findIndex((guest: {link: string, name: string}) => guest.link === currentLink);
+      
+      if (existingIndex >= 0) {
+        // Cập nhật tên cho link đã tồn tại
+        guestList[existingIndex].name = trimmedName;
+      } else {
+        // Thêm guest mới vào danh sách
+        guestList.push({
+          link: currentLink,
+          name: trimmedName
+        });
+      }
+      
+      saveGuestList(guestList);
+      saveCurrentGuestName(trimmedName);
+      router.replace(`/graduate/letter?name=${encodeURIComponent(trimmedName)}`);
     } else {
       if (!loading && !confirmed && inputRef.current) {
         inputRef.current.focus();
@@ -184,7 +238,7 @@ export default function GraduationPage() {
  \\_____/`}
             </pre>
             <label className="mb-4 w-full max-w-sm text-lg">
-              Lâm thường gọi bạn là gì:
+              {isNewGuest ? "Lâm thường gọi bạn là gì:" : "Xác nhận tên của bạn:"}
               <div className="flex flex-col items-center gap-3 w-full max-w-sm mt-1">
                 <div className="flex items-center w-full">
                   <input
@@ -202,7 +256,7 @@ export default function GraduationPage() {
                     }}
                     className="w-full min-h-[80px] text-green-300 px-2 border-none outline-none 
              focus:outline-none focus:ring-0 focus:border-b focus:border-green-400 resize-none overflow-hidden bg-transparent"
-                    placeholder="Type your name..."
+                    placeholder={isNewGuest ? "Type your name..." : "Confirm your name..."}
                     autoFocus
                   />
                   <button
