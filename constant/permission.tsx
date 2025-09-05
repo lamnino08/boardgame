@@ -47,25 +47,25 @@ export const pageRoutes: Record<string, PageRoute> = {
             }
         },
     },
-    graduate: {
-        path: "/graduate",
-        CheckPermission: async (request) => {
-            const guestAuth = await guestAuthCheck();
-            if (guestAuth.isAuthenticated) {
-                return NextResponse.redirect(new URL("/graduate/letter", request?.url));
-            }
-        }
-    },
-    graduate_in: {
-        path: "/graduate/letter",
-        CheckPermission: async (request) => {
-            const guestAuth = await guestAuthCheck();
-            if (!guestAuth.isAuthenticated) {
-                console.log("herer");
-                return NextResponse.redirect(new URL("/graduate", request?.url));
-            }
-        }
-    }
+    // graduate: {
+    //     path: "/graduate",
+    //     CheckPermission: async (request) => {
+    //         const guestAuth = await guestAuthCheck();
+    //         if (guestAuth.isAuthenticated) {
+    //             return NextResponse.redirect(new URL("/graduate/letter", request?.url));
+    //         }
+    //     }
+    // },
+    // graduate_in: {
+    //     path: "/graduate/letter",
+    //     CheckPermission: async (request) => {
+    //         const guestAuth = await guestAuthCheck();
+    //         if (!guestAuth.isAuthenticated) {
+    //             console.log("herer");
+    //             return NextResponse.redirect(new URL("/graduate", request?.url));
+    //         }
+    //     }
+    // }
 };
 
 /**
