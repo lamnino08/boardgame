@@ -96,8 +96,9 @@ export default function GraduationPage() {
     if (trimmedName.length >= 3) {
       setError(null);
       confirmName({ name: trimmedName });
+      console.log("here111");
       setConfirmed(true);
-      router.push(`/graduate/letter`);
+      router.replace(`/graduate/letter`);
     } else {
       if (!loading && !confirmed && inputRef.current) {
         inputRef.current.focus();
