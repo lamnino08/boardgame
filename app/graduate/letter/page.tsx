@@ -39,11 +39,12 @@ export default function GraduationLetter() {
     // Lấy tên từ localStorage, nếu không có thì redirect
     useEffect(() => {
         const stored = localStorage.getItem("guestName");
-        if (!stored) {
-            router.replace("/graduate");
-        } else {
+        // if (!stored) {
+            // router.replace("/graduate");
+        // } else {
+        console.log(stored);
             setGuestName(stored);
-        }
+        // }
     }, [router]);
 
     // Khi render xong thì auto select input
