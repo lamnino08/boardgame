@@ -91,11 +91,12 @@ export default function GraduationPage() {
   }, [confirmed, guestName, router]);
 
   // Hợp nhất logic xác nhận vào một hàm
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
     const trimmedName = guestName.trim();
     if (trimmedName.length >= 3) {
       setError(null);
-      confirmName({ name: trimmedName });
+      console.log("herereeee");
+      await confirmName({ name: trimmedName });
       console.log("here111");
       setConfirmed(true);
       router.replace(`/graduate/letter`);
