@@ -63,7 +63,18 @@ export default function GraduationPage() {
         // Nếu đã có trong danh sách, set tên và chuyển sang letter
         setGuestName(existingGuest.name);
         saveCurrentGuestName(existingGuest.name);
-        router.replace("/graduate/letter");
+        // Gọi API confirm trước khi chuyển
+        const confirmAndRedirect = async () => {
+          try {
+            await confirmName({ name: existingGuest.name });
+            router.replace("/graduate/letter");
+          } catch (error) {
+            console.error("Error confirming name:", error);
+            // Nếu lỗi, xóa guestName và hiển thị form
+            localStorage.removeItem("guestName");
+          }
+        };
+        confirmAndRedirect();
         return;
       } else {
         // Nếu chưa có, set tên từ URL và đánh dấu là khách mới
@@ -74,10 +85,24 @@ export default function GraduationPage() {
   }, [searchParams, router]);
 
   useEffect(() => {
-    const guestList = getGuestList();
-    if (guestList.length > 0 && !searchParams.get("name")) {
-      // Nếu có danh sách guest nhưng không có params, chuyển sang letter
-      router.replace("/graduate/letter");
+    const nameFromUrl = searchParams.get("name");
+    if (!nameFromUrl) {
+      // Nếu không có name trên URL, check localStorage có guestName không
+      const storedGuestName = localStorage.getItem("guestName");
+      if (storedGuestName) {
+        // Nếu có guestName, gọi API confirm và chuyển sang letter
+        const confirmAndRedirect = async () => {
+          try {
+            await confirmName({ name: storedGuestName });
+            router.replace("/graduate/letter");
+          } catch (error) {
+            console.error("Error confirming name:", error);
+            // Nếu lỗi, xóa guestName và hiển thị form
+            localStorage.removeItem("guestName");
+          }
+        };
+        confirmAndRedirect();
+      }
     }
   }, [router, searchParams]);
 
