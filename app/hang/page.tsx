@@ -143,7 +143,7 @@ export default function BirthdayInvitationPage() {
           <div className="flex items-center gap-3">
             <MapPin className="w-6 h-6 text-pink-500" />
             <a
-              href="https://www.google.com/maps/place/SimSimi+Qu%C3%A1n/@16.0488059,108.2315196,17.5z"
+              href="https://www.google.com/maps/place/SimSimi+Qu%C3%A1n/@16.0490335,108.2314531,17z/data=!3m1!4b1!4m6!3m5!1s0x314219d9a4fc54f9:0x5acf24033e41664e!8m2!3d16.0490284!4d108.234028!16s%2Fg%2F11gfhwxy_1?entry=ttu&g_ep=EgoyMDI1MDkxMC4wIKXMDSoASAFQAw%3D%3D"
               target="_blank"
               rel="noopener noreferrer"
               className="text-gray-800 font-medium hover:underline text-pink-600"
