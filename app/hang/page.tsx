@@ -78,7 +78,7 @@ export default function BirthdayInvitationPage() {
   const guestName = searchParams.get("name") || "bạn";
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-pink-100 via-purple-100 to-yellow-100 p-6 relative overflow-hidden">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-pink-100 via-purple-100 to-yellow-100 p-2 relative overflow-hidden">
       
       {/* Trang trí nền */}
       <div className="absolute inset-0 pointer-events-none">
