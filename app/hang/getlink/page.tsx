@@ -21,7 +21,7 @@ export default function GenerateLinkPage() {
   }, []);
 
   const handleGenerate = () => {
-    const url = `${window.location.origin}/invite?name=${encodeURIComponent(
+    const url = `${window.location.origin}/hang?name=${encodeURIComponent(
       name || "bạn"
     )}`;
     const newEntry = { name: name || "bạn", link: url };
