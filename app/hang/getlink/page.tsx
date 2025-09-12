@@ -21,7 +21,7 @@ export default function GenerateLinkPage() {
   }, []);
 
   const handleGenerate = () => {
-    const url = `${window.location.origin}/hang?name=${encodeURIComponent(
+    const url = `${window.location.origin}/invite?name=${encodeURIComponent(
       name || "bạn"
     )}`;
     const newEntry = { name: name || "bạn", link: url };
@@ -41,10 +41,16 @@ export default function GenerateLinkPage() {
     setTimeout(() => setCopiedIndex(null), 2000);
   };
 
+  const handleDelete = (index: number) => {
+    const updatedLinks = links.filter((_, i) => i !== index);
+    setLinks(updatedLinks);
+    localStorage.setItem("invite-links", JSON.stringify(updatedLinks));
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-pink-100 via-purple-100 to-yellow-100 p-6">
       <div className="bg-white p-8 rounded-2xl shadow-2xl max-w-lg w-full text-center">
-        <h1 className="text-lg font-bold text-pink-600 mb-4">
+        <h1 className="text-2xl font-bold text-pink-600 mb-4">
           🔗 Tạo Link Thiệp Mời
         </h1>
 
@@ -75,7 +81,7 @@ export default function GenerateLinkPage() {
               {links.map((item, index) => (
                 <li
                   key={index}
-                  className="p-4 bg-pink-50 rounded-xl shadow flex flex-col sm:flex-row sm:items-center sm:justify-between"
+                  className="p-4 bg-pink-50 rounded-xl shadow flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2"
                 >
                   <div>
                     <p className="text-pink-700 font-medium">{item.name}</p>
@@ -88,12 +94,20 @@ export default function GenerateLinkPage() {
                       {item.link}
                     </a>
                   </div>
-                  <button
-                    onClick={() => handleCopy(item.link, index)}
-                    className="mt-2 sm:mt-0 bg-gray-200 px-3 py-1 rounded-lg hover:bg-gray-300 transition text-sm"
-                  >
-                    {copiedIndex === index ? "✅ Đã copy!" : "📋 Copy"}
-                  </button>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => handleCopy(item.link, index)}
+                      className="bg-gray-200 px-3 py-1 rounded-lg hover:bg-gray-300 transition text-sm"
+                    >
+                      {copiedIndex === index ? "✅ Đã copy!" : "📋 Copy"}
+                    </button>
+                    <button
+                      onClick={() => handleDelete(index)}
+                      className="bg-red-200 px-3 py-1 rounded-lg hover:bg-red-300 transition text-sm text-red-700"
+                    >
+                      ❌ Xoá
+                    </button>
+                  </div>
                 </li>
               ))}
             </ul>
