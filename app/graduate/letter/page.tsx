@@ -59,7 +59,7 @@ export default function GraduationLetter() {
     const eventTime = useMemo(() => {
         const now = new Date();
         let y = now.getFullYear();
-        let t = new Date(y, 8, 20, 7, 30, 0); // Tháng 9 là 8 (0-index)
+        let t = new Date(y, 8, 20, 10, 30, 0); // Tháng 9 là 8 (0-index)
         return t;
     }, []);
 
@@ -133,7 +133,9 @@ export default function GraduationLetter() {
                         </motion.span>.
                     </p>
 
-                    <p className='my-4 text-center text-sm'> Một dấu mốc đáng nhớ trong hành trình của chúng mình, nơi mà mỗi khoảnh khắc đều trở thành kỷ niệm, và sự hiện diện của bạn sẽ làm ngày đặc biệt này thêm phần đáng nhớ!</p>
+                    <p className='my-4 text-center text-sm'>
+                        Một dấu mốc đáng nhớ trong hành trình của mình, nơi mà mỗi khoảnh khắc đều trở thành kỷ niệm, và sự hiện diện của bạn sẽ làm ngày đặc biệt này thêm phần đáng nhớ!
+                    </p>
 
                     {/* Chi tiết sự kiện */}
                     <motion.div
@@ -159,7 +161,7 @@ export default function GraduationLetter() {
                                 }}
                                 className="text-green-400 inline-block"
                             >
-                                07:30 · 20/09/2025
+                                10:30 · 20/09/2025
                             </motion.span>
                         </motion.p>
                         <p className="text-sm md:text-base text-green-200/80">
@@ -190,9 +192,12 @@ export default function GraduationLetter() {
 > 2. Xem thông tin sự kiện 📅
 > 3. Xác nhận tham gia 🚀
 > 4. Chia sẻ một kỷ niệm ✨
-> 5. Đố vui ✨
  `}
                 </pre>
+
+
+
+
 
                 <div className="mt-4 flex flex-col sm:flex-row items-start sm:items-center gap-2 w-full">
                     <span className="text-green-400">C:\\{guestName}&gt;</span>
@@ -224,17 +229,22 @@ export default function GraduationLetter() {
             </motion.div>
 
             {/* Trạng thái sự kiện */}
-            <motion.p
+            <motion.div
                 key={isStarted ? 'started' : 'waiting'}
                 initial={{ opacity: 0, y: 6 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4 }}
                 className="mt-6 text-green-200/90"
             >
-                {isStarted
-                    ? '🎉 Sự kiện đang bắt đầu! Hẹn gặp bạn ở lễ tốt nghiệp.'
-                    : '⌛ Đếm ngược tới giờ G...'}
-            </motion.p>
+                <p>
+                    {isStarted
+                        ? '🎉 Sự kiện đang bắt đầu! Hẹn gặp bạn ở lễ tốt nghiệp.'
+                        : '⌛ Đếm ngược tới giờ G...'}
+                </p>
+                <pre className="text-left text-red-700 text-sm md:text-base leading-relaxed">
+                    {`** Thời gian (10h30) là dự kiến và có thể thay đổi`}
+                </pre>
+            </motion.div>
         </>
     );
 }
