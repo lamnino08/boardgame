@@ -56,10 +56,10 @@ export default function EventDetailPage() {
                     <div className="rounded border border-green-700 p-4 bg-black/50 mb-2">
                         <div className="text-green-400 font-semibold mb-2">Thời gian – Địa điểm</div>
                         <ul className="list-disc pl-5 text-green-300 text-sm space-y-1">
-                            <li>Thời gian: 7:30 – 6:30</li>
+                            <li>Thời gian: 7:30 – 15:30</li>
                             <li>Địa điểm chính: {DEST_NAME}</li>
                             <li>Địa chỉ: {DEST_ADDRESS}</li>
-                            <li>Số điện thoại: {DEST_SDT} - kỹ sư phần mềm Phan Đức Lâm</li>
+                            <li>Số điện thoại: {DEST_SDT} - kỹ sư Công nghệ phần mềm Phan Đức Lâm</li>
                         </ul>
                     </div>
                     <div className="rounded border border-green-700 p-2 bg-black/50 mb-2 gap-4">

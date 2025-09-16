@@ -161,7 +161,7 @@ export default function GraduationLetter() {
                                 }}
                                 className="text-green-400 inline-block"
                             >
-                                10:30 · 20/09/2025
+                                11:00 · 20/09/2025
                             </motion.span>
                         </motion.p>
                         <p className="text-sm md:text-base text-green-200/80">
