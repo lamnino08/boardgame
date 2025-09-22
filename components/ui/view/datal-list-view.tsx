@@ -2,395 +2,478 @@
 
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import Table, { Column } from '@/components/ui/view/table';
-import {Card} from '@/components/ui/Card';
+import { Card } from '@/components/ui/Card';
 import { TextInput } from '@/components/ui/form/base-component/text-input';
 import Button from '@/components/ui/common/button/button';
-import icons from '@/components/icons';
 import { debounce } from '@/lib/debouce';
+import { BaseModel } from '@/model/base/base-model';
+import { Variant } from '@/components/type';
+import { ESortDirection } from '@/model/common/sortDirection';
+import { ApiResponse } from '@/lib/api/api-helper';
+import { EAlertType, useAlert } from '@/contexts/alert-context';
+import icons from '@/components/icons';
+import Dropdown, { DropdownOption } from '@/components/ui/form/base-component/dropdown';
+
+export type DataListViewMutators<T> = {
+    updateItemById: (updated: Partial<T> & { id: string }) => void;
+    removeItemById: (id: string) => void;
+    prependItem: (item: T) => void;
+    showAlert: (message: string, type?: EAlertType) => void;
+};
+
+export const DataListViewContext = React.createContext<DataListViewMutators<any> | null>(null);
+
+export const useDataListView = <T extends BaseModel>() => {
+    const ctx = React.useContext(DataListViewContext) as DataListViewMutators<T> | null;
+    if (!ctx) throw new Error('useDataListView must be used within DataListView');
+    return ctx;
+};
+
+export interface SortParam<T> { key: keyof T; direction: ESortDirection };
+
+export interface FilterParams<T> {
+    offset: number,
+    limit: number,
+    search?: string,
+    filters?: Record<string, string | { from?: string; to?: string; }>,
+    ranges?: Record<string, { from?: string; to?: string; }>,
+    sort?: SortParam<T> | undefined
+
+    [key: string]: any; // match with Query params
+}
 
 interface DataListViewProps<T> {
     header?: {
         title?: string;
+        title_addition?: React.ReactNode;
         search?: {
             placeholder?: string;
-            value?: string;
-            onChange?: (value: string) => void;
         };
-        actions?: [
-            {
-                icon?: React.ReactNode;
-                text: string;
-                onClick: () => void;
-                variant?: 'primary' | 'secondary';
-            }
-        ]
-    }
-    click?: {
-        onRowClick: (row: T) => void;
+        filters?: {
+            key: keyof T;
+            options: DropdownOption[];
+            className?: string;
+            placeholder: string;
+            enable?: boolean
+        }[];
+        actions?: Array<{
+            icon?: React.ReactNode;
+            text?: string;
+            onClick?: () => void;
+            onClickWithHelpers?: (helpers: DataListViewMutators<T>) => void;
+            variant?: Variant;
+            condition?: boolean
+        }>;
     };
+    footer?: {
+        actions?: Array<{
+            icon?: React.ReactNode;
+            text?: string;
+            onClick?: () => void;
+            onClickWithHelpers?: (helpers: DataListViewMutators<T>) => void;
+            variant?: Variant;
+        }>;
+    };
+    onRowClick?: (row: T) => void;
     table?: {
         columns: Column<T>[];
-    }
+    };
+    rowAction?: {
+        render: (row: T, helpers: DataListViewMutators<T>) => React.ReactNode;
+        label?: string;
+        minWidth?: string;
+        maxWidth?: string;
+        width?: string;
+        align?: 'left' | 'center' | 'right';
+    };
     card?: {
         className?: string;
         content: React.JSX.Element | ((item: T) => React.ReactNode);
     };
-    fetchData: (
-        page: number,
-        pageSize: number,
-        options?: {
-            search?: string;
-            filters?: Record<string, string>;
-            sort?: { key: string; direction: 'asc' | 'desc' } | null;
-        }
-    ) => Promise<{ data: T[]; total: number }>;
+    fetchData: (params: FilterParams<T>) => Promise<ApiResponse<T[]>>;
+    onDataLoaded?: (data: T[]) => void;
     pageSize?: number;
 }
 
-export function DataListView<T extends { id: number }>({
+export function DataListView<T extends BaseModel>({
     header,
-    click,
+    footer,
+    onRowClick,
     table,
+    rowAction,
     card,
     fetchData,
     pageSize = 5,
+    onDataLoaded,
 }: DataListViewProps<T>) {
     const [data, setData] = useState<T[]>([]);
-    const [page, setPage] = useState(1);
+    const [removedIds, setRemovedIds] = useState<Set<string>>(new Set());
+    const [offset, setOffset] = useState(0);
+    const [limit, setLimit] = useState(pageSize);
     const [searchQuery, setSearchQuery] = useState('');
-    const [filters, setFilters] = useState<Record<string, string>>({});
-    const [sort, setSort] = useState<{ key: string; direction: 'asc' | 'desc' } | null>(null);
-    const [total, setTotal] = useState(0);
+    const [filters, setFilters] = useState<Record<string, string | { from?: string; to?: string; }>>({});
+    const [ranges, setRanges] = useState<Record<string, { from?: string; to?: string; }>>({});
+    const [sort, setSort] = useState<SortParam<T> | undefined>(undefined);
+    const [isLoadMoreable, setLetMoreAble] = useState<boolean>(false);
 
     const [loadingInitial, setLoadingInitial] = useState(false);
     const [loadingMore, setLoadingMore] = useState(false);
+
+    const showAlert = useAlert();
 
     const loadData = useCallback(
         async (reset = false) => {
             if (reset) setLoadingInitial(true);
             else setLoadingMore(true);
 
-            const result = await fetchData(page, pageSize, {
+            const response = await fetchData({
+                offset,
+                limit,
                 search: searchQuery,
                 filters,
+                ranges,
                 sort,
             });
 
-            setData((prev) => (reset ? result.data : [...prev, ...result.data]));
-            setTotal(result.total);
+            if (!response.meta.success) {
+                showAlert(response.meta.external_message, EAlertType.ERROR)
+                return;
+            }
 
+            if (onDataLoaded && response.data) {
+                onDataLoaded(response.data);
+            }
+
+            setData((prev) => reset ? (response.data ?? []) : [...prev, ...(response.data ?? [])]);
             if (reset) setLoadingInitial(false);
             else setLoadingMore(false);
+
+            setLetMoreAble((response?.data?.length || 0) >= limit);
         },
-        [page, pageSize, searchQuery, filters, sort, fetchData]
+        [offset, limit, searchQuery, filters, ranges, sort, fetchData]
     );
 
-    // Load khi thay đổi page, filter, search, sort
+    // Load khi thay đổi offset, filter, search, sort
     useEffect(() => {
-        loadData(page === 1); // reset khi về trang 1
-    }, [page, searchQuery, filters, sort, loadData]);
+        loadData(offset === 0);
+    }, [offset, limit, searchQuery, filters, ranges, sort, loadData]);
 
     const handleSeeMore = () => {
-        setPage((prev) => prev + 1);
+        setOffset((prev) => prev + limit);
     };
 
-    const handleSearchChange = useMemo(() => {
-        return (value: string) => {
-            setPage(1);
-            setSearchQuery(value); // update input ngay
+    // Debounce search input
+    const debouncedSetSearchQuery = useMemo(() => debounce((value: string) => {
+        setOffset(0);
+        setSearchQuery(value);
+    }, 400), []);
 
-            // chỉ debounce phần callback search
-            debouncedSearch(value);
-        };
-    }, []);
+    const handleFilterChange = (filters: Record<string, string | { from?: string; to?: string }>) => {
+        setOffset(0);
 
-    const debouncedSearch = useMemo(
-        () =>
-            debounce((value: string) => {
-                header?.search?.onChange?.(value);
-            }, 400),
-        [header]
-    );
+        const newFilters = { ...filters };
+        const newRanges = { ...ranges };
 
-    const handleFilterChange = (newFilters: Record<string, string>) => {
-        setPage(1);
+        for (const key in filters) {
+            const value = filters[key];
+
+            if (typeof value === 'string') {
+                if (value.length > 0) {
+                    newFilters[key] = value;
+                    delete newRanges[key];
+                } else {
+                    delete newFilters[key];
+                    delete newRanges[key];
+                }
+            }
+            else if (typeof value === 'object' && value !== null) {
+                // check has from or true
+                const hasFrom = typeof value.from === 'string' && value.from.length > 0;
+                const hasTo = typeof value.to === 'string' && value.to.length > 0;
+
+                if (hasFrom || hasTo) {
+                    newRanges[key] = value;
+                    delete newFilters[key];
+                } else {
+                    delete newFilters[key];
+                    delete newRanges[key];
+                }
+            }
+        }
+
         setFilters(newFilters);
+        setRanges(newRanges);
+    }
+
+    const handleHeaderFilterChange = (key: string, value: string | null) => {
+        setOffset(0);
+        setFilters(prevFilters => {
+            const newFilters = { ...prevFilters };
+            if (value) {
+                newFilters[key] = value;
+            } else {
+                delete newFilters[key];
+            }
+            return newFilters;
+        });
     };
 
-    const handleSortChange = (newSort: { key: string; direction: 'asc' | 'desc' } | null) => {
-        setPage(1);
+    const handleSortChange = (newSort: SortParam<T> | undefined) => {
+        setOffset(0);
         setSort(newSort);
     };
 
-    return (
-        <Card className="overflow-visible">
-            {/* Header */}
-            {header && (
-                <div className="flex items-center justify-between mb-4 min-w-0">
-                    {header.title && (
-                        <h2 className="text-lg font-semibold text-text-primary truncate" title={header.title}>
-                            {header.title}
-                        </h2>
-                    )}
+    const displayData = React.useMemo(() => {
+        const byId = new Map<string, T>();
+        data.forEach((item: any) => {
+            if (!removedIds.has(item.id)) byId.set(item.id, item);
+        });
+        return Array.from(byId.values());
+    }, [data, removedIds]);
 
-                    <div className="flex items-center gap-2 flex-shrink-0">
-                        {header.search && (
-                            <div
-                                className={`max-w-[200px]`}
-                            >
-                                <TextInput
-                                    size="sm"
-                                    className="w-full truncate"
-                                    value={searchQuery}
-                                    placeholder={header.search.placeholder || 'Search...'}
-                                    // onChange={(e) => handleSearchChange(e.target.value)}
-                                />
+    const updateItemById = useCallback((updated: Partial<T> & { id: string }) => {
+        setData((prev) => prev.map((it: any) => (it.id === updated.id ? { ...it, ...updated } : it)));
+    }, []);
+
+    const removeItemById = useCallback((id: string) => {
+        setData((prev) => prev.filter((it: any) => it.id !== id));
+        setRemovedIds((prev) => new Set(prev).add(id));
+    }, []);
+
+    const prependItem = useCallback((item: T) => {
+        setData((prev) => [item, ...prev]);
+    }, []);
+
+    const helpers: DataListViewMutators<T> = { updateItemById, removeItemById, prependItem, showAlert };
+
+    const computedColumns = React.useMemo(() => {
+        if (!table) return undefined;
+        if (!rowAction) return table.columns;
+        return [
+            ...table.columns,
+            {
+                key: 'id' as keyof T, // BaseModel.id
+                label: rowAction.label || 'Actions',
+                minWidth: rowAction.minWidth,
+                maxWidth: rowAction.maxWidth,
+                width: rowAction.width || '96px',
+                align: rowAction.align || 'right',
+                render: (row: T) => rowAction.render(row, helpers),
+            } as Column<T>,
+        ];
+    }, [table, rowAction, helpers]);
+
+    return (
+        <DataListViewContext.Provider value={{ updateItemById, removeItemById, prependItem, showAlert }}>
+            <div className="overflow-visible w-full">
+                {/* Header */}
+                {header && (
+                    <div className="flex items-center justify-between mb-4 min-w-0">
+                        <div className='flex gap-2'>
+                            {header.title && (
+                                <h2 className="text-lg font-semibold text-text-primary truncate" title={header.title}>
+                                    {header.title}
+                                </h2>
+                            )}
+
+                            {header.title_addition && header.title_addition}
+                        </div>
+
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                            {header.filters && header.filters.map((filter) => {
+                                if (filter.enable !== null && filter.enable == false) return null;
+
+                                return (
+                                    <div
+                                        key={filter.key as string}
+                                        className="max-w-[200px] min-w-32"
+                                    >
+                                        <Dropdown
+                                            size="sm"
+                                            options={filter.options}
+                                            value={filters[filter.key as string] || null}
+                                            className={filter.className}
+                                            placeholder={filter.placeholder}
+                                            onChange={(value) =>
+                                                handleHeaderFilterChange(
+                                                    filter.key as string,
+                                                    value as string | null
+                                                )
+                                            }
+                                        />
+                                    </div>
+                                );
+                            })}
+
+
+                            {header.search && (
+                                <div className={`max-w-[200px]`}>
+                                    <TextInput
+                                        size="sm"
+                                        className="w-full truncate"
+                                        value={searchQuery}
+                                        placeholder={header.search.placeholder || 'Search...'}
+                                        onChange={val => debouncedSetSearchQuery(val)}
+                                    />
+                                </div>
+                            )}
+                            {
+                                header.actions && header.actions.length > 0 && (
+                                    <div className="flex items-center gap-2">
+                                        {/* Lọc các action thỏa mãn điều kiện trước */}
+                                        {header.actions
+                                            .filter(action => action.condition !== false)
+                                            .map((action, index) => (
+                                                <Button
+                                                    key={index}
+                                                    size='sm'
+                                                    onClick={() => action.onClickWithHelpers ? action.onClickWithHelpers(helpers) : action.onClick?.()}
+                                                    variant={action.variant}
+                                                    className="flex items-center transition-all duration-300"
+                                                >
+                                                    {action.icon && <span className="flex-shrink-0">{action.icon}</span>}
+                                                    {action.text}
+                                                </Button>
+                                            ))
+                                        }
+                                    </div>
+                                )
+                            }
+                        </div>
+                    </div>
+                )}
+
+                {/* Table */}
+                {table && (
+                    <Table
+                        columns={computedColumns || table.columns}
+                        data={displayData}
+                        rowKey={(row) => row.id}
+                        hoverable
+                        onRowClick={onRowClick}
+                        loading={loadingInitial || loadingMore}
+                        onFilterChange={handleFilterChange}
+                        onSortChange={handleSortChange}
+                        sort={sort}
+                        emptyState={(
+                            <div className="flex flex-col items-center justify-center py-12 text-center">
+                                <div className="w-16 h-16 mb-4 text-text-primary">
+                                    {icons.empty}
+                                </div>
+                                <h3 className="text-lg font-medium text-text-primary mb-2">No data found</h3>
+                                <p className="text-text-secondary mb-4">
+                                    {searchQuery || Object.keys(filters).length > 0
+                                        ? "No results match your search criteria. Try adjusting your filters."
+                                        : "There are no items to display at the moment."
+                                    }
+                                </p>
+                                {(searchQuery || Object.keys(filters).length > 0) && (
+                                    <Button
+                                        variant="secondary"
+                                        size="sm"
+                                        onClick={() => {
+                                            setSearchQuery('');
+                                            setFilters({});
+                                            setOffset(0);
+                                        }}
+                                    >
+                                        Clear filters
+                                    </Button>
+                                )}
                             </div>
                         )}
+                    />
+                )}
 
-                        {header.actions && header.actions.length > 0 && (
-                            <div className="flex items-center gap-2">
-                                {header.actions.map((action, index) => (
-                                    <Button
-                                        key={index}
-                                        onClick={action.onClick}
-                                        variant={action.variant}
-                                        className="flex items-center transition-all duration-300"
+                {/* Card Content */}
+                {card && (
+                    <>
+                        {loadingInitial ? (
+                            <div className="flex flex-col items-center justify-center py-12 text-center">
+                                <div className="w-8 h-8 mb-4 text-text-primary animate-spin">
+                                    <svg className="w-full h-full" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                    </svg>
+                                </div>
+                                <h3 className="text-lg font-medium text-text-primary mb-2">Loading data...</h3>
+                                <p className="text-text-secondary">Please wait while we fetch the data</p>
+                            </div>
+                        ) : displayData.length > 0 ? (
+                            <div className={card.className || "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"}>
+                                {displayData.map((item) => (
+                                    <Card
+                                        key={item.id}
+                                        className="p-4 shadow-md hover:shadow-lg transition-all cursor-pointer"
+                                        onClick={() => onRowClick?.(item)}
                                     >
-                                        {action.icon && <span className="flex-shrink-0">{action.icon}</span>}
-                                        {action.text}
-                                    </Button>
-
+                                        {/* Content của card được truyền từ props */}
+                                        {typeof card.content === "function"
+                                            ? (card.content as (item: T) => React.ReactNode)(item)
+                                            : card.content}
+                                    </Card>
                                 ))}
                             </div>
+                        ) : (
+                            <div className="flex flex-col items-center justify-center py-12 text-center">
+                                <div className="w-16 h-16 mb-4 text-text-primary">
+                                    {icons.empty}
+                                </div>
+                                <h3 className="text-lg font-medium text-text-primary mb-2">No data found</h3>
+                                <p className="text-text-secondary mb-4">
+                                    {searchQuery || Object.keys(filters).length > 0
+                                        ? "No results match your search criteria. Try adjusting your filters."
+                                        : "There are no items to display at the moment."
+                                    }
+                                </p>
+                                {(searchQuery || Object.keys(filters).length > 0) && (
+                                    <Button
+                                        variant="secondary"
+                                        size="sm"
+                                        onClick={() => {
+                                            setSearchQuery('');
+                                            setFilters({});
+                                            setOffset(0);
+                                        }}
+                                    >
+                                        Clear filters
+                                    </Button>
+                                )}
+                            </div>
                         )}
-                    </div>
-                </div>
-            )}
-
-            {/* Table */}
-            {table && (
-                <Table
-                    columns={table.columns}
-                    data={data}
-                    rowKey={(row) => row.id}
-                    hoverable
-                    click={click}
-                    loading={loadingInitial}  // loading chính
-                    onFilterChange={handleFilterChange}
-                    onSortChange={handleSortChange}
-                />
-            )}
-
-            {/* Card Content */}
-            {card && (
-                <div className={card.className || "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"}>
-                    {data.map((item) => (
-                        <Card
-                            key={item.id}
-                            className="p-4 shadow-md hover:shadow-lg transition-all cursor-pointer"
-                            onClick={() => click?.onRowClick?.(item)}
-                        >
-                            {/* Content của card được truyền từ props */}
-                            {typeof card.content === "function"
-                                ? (card.content as (item: T) => React.ReactNode)(item)
-                                : card.content}
-                        </Card>
-                    ))}
-                </div>
-            )}
-
-
-
-            {/* Footer */}
-            <div className="flex flex-col gap-2">
-                {data.length < total && (
-                    <Button
-                        onClick={handleSeeMore}
-                        loading={loadingMore}
-                        className="w-full focus:none"
-                        variant="secondary"
-                    >
-                        See More
-                    </Button>
+                    </>
                 )}
-                <span className="text-sm text-neutral-400">
-                    Showing {data.length} of {total} records
-                </span>
-            </div>
-        </Card>
-    );
-}
 
-export default DataListView;
-
-interface User {
-    id: number;
-    name: string;
-    email: string;
-    age: number;
-    role: string;
-}
-
-// Dataset mô phỏng API
-const allUsers: User[] = [
-    { id: 1, name: 'John Doe', email: 'john@example.com', age: 28, role: 'Developer' },
-    { id: 2, name: 'Jane Smith', email: 'jane@example.com', age: 32, role: 'Designer' },
-    { id: 3, name: 'Mike Brown', email: 'mike@example.com', age: 40, role: 'Manager' },
-    { id: 4, name: 'Anna Lee', email: 'anna@example.com', age: 24, role: 'Intern' },
-    { id: 5, name: 'Chris Green', email: 'chris@example.com', age: 35, role: 'QA' },
-    { id: 6, name: 'Sarah White', email: 'sarah@example.com', age: 29, role: 'Product Owner' },
-    { id: 7, name: 'David Black', email: 'david@example.com', age: 38, role: 'Developer' },
-    { id: 8, name: 'Laura Scott', email: 'laura@example.com', age: 27, role: 'Designer' },
-    { id: 9, name: 'Kevin Hall', email: 'kevin@example.com', age: 42, role: 'Manager' },
-    { id: 10, name: 'Emma Turner', email: 'emma@example.com', age: 26, role: 'Intern' },
-    { id: 11, name: 'Ryan King', email: 'ryan@example.com', age: 34, role: 'QA' },
-    { id: 12, name: 'Olivia Adams', email: 'olivia@example.com', age: 31, role: 'Product Owner' },
-    { id: 13, name: 'Jason Reed', email: 'jason@example.com', age: 29, role: 'Developer' },
-    { id: 14, name: 'Sophia Young', email: 'sophia@example.com', age: 30, role: 'Designer' },
-    { id: 15, name: 'Daniel Perez', email: 'daniel@example.com', age: 39, role: 'Manager' },
-    { id: 16, name: 'Mia Carter', email: 'mia@example.com', age: 23, role: 'Intern' },
-    { id: 17, name: 'Jacob Evans', email: 'jacob@example.com', age: 36, role: 'QA' },
-    { id: 18, name: 'Isabella Brooks', email: 'isabella@example.com', age: 28, role: 'Product Owner' },
-    { id: 19, name: 'Matthew Ward', email: 'matthew@example.com', age: 33, role: 'Developer' },
-    { id: 20, name: 'Amelia Cox', email: 'amelia@example.com', age: 25, role: 'Designer' },
-    { id: 21, name: 'Andrew Gray', email: 'andrew@example.com', age: 45, role: 'Manager' },
-    { id: 22, name: 'Ella Rivera', email: 'ella@example.com', age: 22, role: 'Intern' },
-    { id: 23, name: 'Joshua Hughes', email: 'joshua@example.com', age: 37, role: 'QA' },
-    { id: 24, name: 'Charlotte Foster', email: 'charlotte@example.com', age: 30, role: 'Product Owner' },
-    { id: 25, name: 'Benjamin Ross', email: 'benjamin@example.com', age: 28, role: 'Developer' },
-    { id: 26, name: 'Grace Morgan', email: 'grace@example.com', age: 27, role: 'Designer' },
-    { id: 27, name: 'Ethan Hughes', email: 'ethan@example.com', age: 41, role: 'Manager' },
-    { id: 28, name: 'Abigail Diaz', email: 'abigail@example.com', age: 24, role: 'Intern' },
-    { id: 29, name: 'Alexander Scott', email: 'alexander@example.com', age: 35, role: 'QA' },
-    { id: 30, name: 'Harper Bennett', email: 'harper@example.com', age: 29, role: 'Product Owner' },
-];
-
-// API giả lập (filter + search + sort + phân trang)
-async function fetchUsers(
-    page: number,
-    pageSize: number,
-    options?: {
-        search?: string;
-        filters?: Record<string, string>;
-        sort?: { key: string; direction: 'asc' | 'desc' } | null;
-    }
-) {
-    let filtered = [...allUsers];
-
-    await new Promise((resolve) => setTimeout(resolve, 3000)); // Giả lập delay API
-
-    const { search, filters = {}, sort } = options || {};
-
-    // Search theo name
-    if (search) {
-        filtered = filtered.filter((u) =>
-            u.name.toLowerCase().includes(search.toLowerCase())
-        );
-    }
-
-    // Filter theo role, age, name
-    if (filters.role) {
-        filtered = filtered.filter((u) => u.role === filters.role);
-    }
-    if (filters.age) {
-        filtered = filtered.filter((u) => u.age === Number(filters.age));
-    }
-    if (filters.name) {
-        filtered = filtered.filter((u) =>
-            u.name.toLowerCase().includes(filters.name.toLowerCase())
-        );
-    }
-
-    // Sort nếu có
-    if (sort) {
-        filtered.sort((a, b) => {
-            const aValue = a[sort.key as keyof User];
-            const bValue = b[sort.key as keyof User];
-            if (aValue < bValue) return sort.direction === 'asc' ? -1 : 1;
-            if (aValue > bValue) return sort.direction === 'asc' ? 1 : -1;
-            return 0;
-        });
-    }
-
-    const start = (page - 1) * pageSize;
-    const data = filtered.slice(start, start + pageSize);
-    return { data, total: filtered.length };
-}
-
-// Định nghĩa cột
-const userColumns: Column<User>[] = [
-    {
-        key: 'name',
-        label: 'Name',
-        sortable: true,
-        filter: { filterType: 'text' },
-    },
-    {
-        key: 'email',
-        label: 'Email',
-    },
-    {
-        key: 'age',
-        label: 'Age',
-        sortable: true,
-        filter: { filterType: 'text' },
-    },
-    {
-        key: 'role',
-        label: 'Role',
-        filter: {
-            filterType: 'dropdown',
-            filterOptions: [
-                { value: '', label: 'All' },
-                { value: 'Developer', label: 'Developer' },
-                { value: 'Designer', label: 'Designer' },
-                { value: 'Manager', label: 'Manager' },
-                { value: 'Intern', label: 'Intern' },
-                { value: 'QA', label: 'QA' },
-                { value: 'Product Owner', label: 'Product Owner' },
-            ],
-        },
-    },
-];
-
-const onRowClick = (user: User) => {
-    alert(`Clicked on ${user.name}`);
-}
-
-export const UserListPage = () => {
-    return (
-        <DataListView<User>
-            header={{
-                title: 'User List',
-                search: {
-                    placeholder: 'Search by name',
-                    onChange: (value) => console.log('Search:', value),
-                },
-                actions: [
-                    { icon: icons.add, text: 'Add user', onClick: () => alert('Add user'), variant: 'primary' },
-                ]
-            }}
-            table={{
-
-                columns: userColumns
-            }}
-            card={{
-                className: 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4',
-                content: (user: User) => (
-                    <div>
-                        <h3 className="text-lg font-semibold">{user.name}</h3>
-                        <p className="text-sm text-neutral-500">{user.email}</p>
-                        <p className="text-sm text-neutral-500">Age: {user.age}</p>
-                        <p className="text-sm text-neutral-500">Role: {user.role}</p>
+                {/* Footer Actions */}
+                {footer?.actions && footer.actions.length > 0 && (
+                    <div className="flex items-center gap-2 justify-end mt-4 mb-2">
+                        {footer.actions.map((action, index) => (
+                            <Button
+                                key={index}
+                                onClick={() => action.onClickWithHelpers ? action.onClickWithHelpers(helpers) : action.onClick?.()}
+                                variant={action.variant}
+                                className="flex items-center transition-all duration-300"
+                            >
+                                {action.icon && <span className="flex-shrink-0">{action.icon}</span>}
+                                {action.text}
+                            </Button>
+                        ))}
                     </div>
-                )
-            }}
-            click={{
-                onRowClick: onRowClick
-            }}
-            fetchData={fetchUsers}
-            pageSize={5}
-        />
+                )}
+
+                {/* Footer */}
+                <div className="flex flex-col gap-2">
+                    {isLoadMoreable && (
+                        <Button
+                            onClick={handleSeeMore}
+                            loading={loadingMore}
+                            className="w-full focus:none"
+                            variant="secondary"
+                        >
+                            See More
+                        </Button>
+                    )}
+                </div>
+            </div>
+        </DataListViewContext.Provider>
     );
-};
+}

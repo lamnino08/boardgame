@@ -33,52 +33,6 @@ module.exports = {
         success: 'var(--success)',
         danger: 'var(--danger)',
         warning: 'var(--warning)',
-
-        // New semantic colors based on common usage in components
-        app: {
-          blue: {
-            DEFAULT: '#3b82f6', // blue-500
-            light: '#60a5fa',   // blue-400
-            dark: '#1e40af',    // blue-900
-            border: '#60a5fa',  // blue-400
-            gradient: {
-              from: '#60a5fa',  // blue-400
-              to: '#2563eb',    // blue-600
-            },
-          },
-          red: {
-            DEFAULT: '#ef4444', // red-500
-            light: '#f87171',   // red-400
-            border: '#f87171',  // red-400
-            hover: '#dc2626',   // red-700
-            gradient: {
-              from: '#f87171',  // red-400
-              to: '#dc2626',    // red-600
-            },
-          },
-          purple: {
-            DEFAULT: '#a855f7', // purple-500
-            light: '#c084fc',   // purple-400
-            border: '#c084fc',  // purple-400
-          },
-          indigo: {
-            DEFAULT: '#4f46e5', // indigo-600
-            dark: '#4338ca',    // indigo-900
-            hover: '#3730a3',   // indigo-800
-          },
-          green: {
-            DEFAULT: '#22c55e', // green-500
-            hover: '#16a34a',   // green-600
-          },
-          cyan: {
-            DEFAULT: '#06b6d4', // cyan-500
-            hover: '#0891b2',   // cyan-600
-          },
-          yellow: {
-            DEFAULT: '#facc15', // yellow-400
-            hover: '#eab308',   // yellow-500
-          },
-        },
       },
 
       input_label: "text-xs ml-4 font-medium text-text-primary",
@@ -109,9 +63,107 @@ module.exports = {
         xs: 'var(--text-xs)',
         sm: 'var(--text-sm)',
         base: 'var(--text-base)',
+        md: 'var(--text-md)',
         lg: 'var(--text-lg)',
         xl: 'var(--text-xl)',
         '2xl': 'var(--text-2xl)',
+      },
+
+      typography: {
+        DEFAULT: {
+          css: {
+            h1: {
+              fontSize: 'var(--text-2xl)',
+              fontWeight: '600',
+              lineHeight: '1.25',
+              marginTop: '0',
+              marginBottom: '1rem',
+            },
+            h2: {
+              fontSize: 'var(--text-xl)',
+              fontWeight: '600',
+              lineHeight: '1.25',
+              marginTop: '1.5rem',
+              marginBottom: '0.75rem',
+            },
+            h3: {
+              fontSize: 'var(--text-lg)',
+              fontWeight: '600',
+              lineHeight: '1.25',
+              marginTop: '1.25rem',
+              marginBottom: '0.5rem',
+            },
+            h4: {
+              fontSize: 'var(--text-md)',
+              fontWeight: '600',
+              lineHeight: '1.25',
+              marginTop: '1rem',
+              marginBottom: '0.5rem',
+            },
+            h5: {
+              fontSize: 'var(--text-base)',
+              fontWeight: '600',
+              lineHeight: '1.25',
+              marginTop: '0.75rem',
+              marginBottom: '0.25rem',
+            },
+            h6: {
+              fontSize: 'var(--text-sm)',
+              fontWeight: '600',
+              lineHeight: '1.25',
+              marginTop: '0.5rem',
+              marginBottom: '0.25rem',
+            },
+            p: {
+              marginTop: '0',
+              marginBottom: '1rem',
+              fontSize: 'var(--text-base)',
+            },
+            a: {
+              color: 'var(--primary)',
+              textDecoration: 'none',
+              '&:hover': {
+                textDecoration: 'underline',
+              },
+            },
+            img: {
+              display: 'block',
+              margin: '0 auto',
+              borderRadius: '0.5rem',
+              border: '1px solid var(--border)',
+            },
+            blockquote: {
+              borderLeft: '4px solid var(--primary)',
+              paddingLeft: '1rem',
+              margin: '1rem 0',
+              fontStyle: 'italic',
+            },
+            code: {
+              backgroundColor: 'var(--muted)',
+              padding: '0.125rem 0.25rem',
+              borderRadius: '0.25rem',
+              fontSize: '0.875rem',
+            },
+            pre: {
+              backgroundColor: 'var(--muted)',
+              padding: '1rem',
+              borderRadius: '0.5rem',
+              overflow: 'auto',
+              margin: '1rem 0',
+            },
+            ul: {
+              paddingLeft: '1.5rem',
+              margin: '0.5rem 0',
+            },
+            ol: {
+              paddingLeft: '1.5rem',
+              margin: '0.5rem 0',
+            },
+            li: {
+              margin: '0.25rem 0',
+            },
+          },
+        },
       },
     },
   },

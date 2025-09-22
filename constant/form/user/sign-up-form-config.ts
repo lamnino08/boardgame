@@ -68,4 +68,4 @@ export const signupFormConfig: FormConfig<{
     submitButtonText: "Sign Up",
 };
 
-export type SignUpInput = ExtractFormValues<typeof signupFormConfig["fields"]>
+export type SignUpInput = ExtractFormValues<typeof signupFormConfig>

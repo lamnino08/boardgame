@@ -1,15 +1,21 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
-import { createPortal } from "react-dom";
 import { CheckCircle, AlertTriangle, Info, XCircle } from "lucide-react";
 
 interface AlertMessage {
   id: number;
   message: string;
-  type?: "info" | "success" | "warning" | "error";
+  type?: EAlertType;
+}
+
+export enum EAlertType {
+  INFOR = 'infor',
+  SUCCESS = 'success',
+  WARNING = 'warning',
+  ERROR = 'error'
 }
 
 interface AlertContextType {
-  showAlert: (message: string, type?: "info" | "success" | "warning" | "error") => void;
+  showAlert: (message: string, type?: EAlertType) => void;
 }
 
 const AlertContext = createContext<AlertContextType | null>(null);
@@ -22,7 +28,7 @@ export function AlertProvider({ children }: { children: ReactNode }) {
     setMounted(true);
   }, []);
 
-  const showAlert = (message: string, type: "info" | "success" | "warning" | "error" = "info") => {
+  const showAlert = (message: string, type: EAlertType = EAlertType.INFOR) => {
     const id = Date.now();
     setAlerts((prev) => [...prev, { id, message, type }]);
     setTimeout(() => setAlerts((prev) => prev.filter((a) => a.id !== id)), 4000);
@@ -41,13 +47,13 @@ export function AlertProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const getBorderColor = (type?: string) => {
+  const getBorderColor = (type?: EAlertType) => {
     switch (type) {
-      case "success":
+      case EAlertType.SUCCESS:
         return "border-success text-success";
-      case "warning":
+      case EAlertType.WARNING:
         return "border-warning text-warning";
-      case "error":
+      case EAlertType.ERROR:
         return "border-danger text-danger";
       default:
         return "border-primary text-primary";
@@ -58,12 +64,12 @@ export function AlertProvider({ children }: { children: ReactNode }) {
     <AlertContext.Provider value={{ showAlert }}>
       {children}
       {mounted && (
-        <div className="fixed top-4 right-4 flex flex-col gap-3">
+        <div className="fixed top-4 right-4 flex flex-col pt-8 gap-3 z-50">
           {alerts.map((alert) => (
             <div
               key={alert.id}
               className={`flex items-center gap-3 px-4 py-3 rounded-lg shadow-lg backdrop-blur-sm 
-                      bg-black/60 border ${getBorderColor(alert.type)} transition-all`}
+                      bg-card border ${getBorderColor(alert.type)} transition-all`}
             >
               {getIcon(alert.type)}
               <span className="font-medium">{alert.message}</span>

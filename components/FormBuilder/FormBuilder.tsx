@@ -55,7 +55,7 @@ export function FormBuilder<TFields extends Record<string, any>>({
         {icon && icon.variant === "logo" && (
           <div className="text-5xl text-green-500">{icon.icon}</div>
         )}
-        <h1 className={`font-extrabold text-text-primary ${centerClass}`}>
+        <h1 className={`font-extrabold text-text-primary text-lg ${centerClass}`}>
           {icon && icon.variant === 'default' && icon.icon} {title}
         </h1>
         {shortcut && (
@@ -85,7 +85,12 @@ export function FormBuilder<TFields extends Record<string, any>>({
 
         {children}
 
-        <Button type="submit" loading={loading}>{config.submitButtonText || "Submit"}</Button>
+        <Button 
+        type="submit"
+        variant="success"
+        loading={loading}>
+          {config.submitButtonText || "Submit"}
+          </Button>
       </form>
     </div>
   );

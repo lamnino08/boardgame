@@ -43,4 +43,4 @@ export const config: FormConfig<{
   submitButtonText: "Sign In",
 };
 
-export type LoginInput = ExtractFormValues<typeof config["fields"]>;
+export type LoginInput = ExtractFormValues<typeof config>;

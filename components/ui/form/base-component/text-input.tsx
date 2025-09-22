@@ -3,14 +3,16 @@ import React, { useState } from 'react';
 import { EyeIcon, EyeOffIcon } from '@/components/icons';
 import { BaseInput } from '@/components/FormBuilder/types';
 
-type InputSize = 'sm' | 'md' | 'lg';
+export type InputSize = 'sm' | 'md' | 'lg';
 type Variant = 'default' | 'floating';
 
 export interface TextInputProps extends BaseInput<string> {
-  type?: 'text' | 'email' | 'password' | 'number';
+  type?: 'text' | 'email' | 'password' | 'number' | 'date' | 'month' | 'week';
   size?: InputSize;
   variant?: Variant;
   placeholder: string;
+  onSubmit?: (val: string) => void;
+  onBlur?: () => void;
 }
 
 export const sizeClasses: Record<InputSize, string> = {
@@ -31,6 +33,9 @@ export const TextInput: React.FC<TextInputProps> = ({
   disabled,
   readOnly,
   className,
+  onSubmit,
+  onBlur,
+  inputRef,
 }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [internalValue, setInternalValue] = useState(value ?? '');
@@ -42,6 +47,15 @@ export const TextInput: React.FC<TextInputProps> = ({
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     onChange?.(e.target.value);
     setInternalValue(e.target.value);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      onSubmit?.(e.currentTarget.value);
+    }
+    if (e.key === 'Escape') {
+      onBlur?.();
+    }
   };
 
   return (
@@ -58,11 +72,13 @@ export const TextInput: React.FC<TextInputProps> = ({
         type={isPassword && showPassword ? 'text' : type}
         value={internalValue}
         onChange={handleChange}
+        onKeyDown={handleKeyDown}
+        ref={inputRef}
+        onBlur={onBlur}
         placeholder={(variant === 'floating' ? '' : placeholder || 'Enter your text')}
         disabled={disabled}
         readOnly={readOnly}
-        className={`
-            input-field peer
+        className={`            input-field peer
             ${isPassword ? 'pr-12' : ''}
             ${sizeClasses[size]}
             ${disabled ? 'bg-disabled cursor-not-allowed opacity-60' : ''}

@@ -9,7 +9,6 @@ import {
   UploadIcon,
   TrashIcon,
   CalendarIcon,
-  MessageIcon,
 } from '@/components/icons';
 import { ASCIILoading } from '@/components/ui/spinner';
 import { Variant, Size } from '@/components/type';
@@ -32,6 +31,8 @@ const variantStyles: Record<Variant, string> = {
   secondary: 'bg-secondary text-white hover:bg-secondary-dark',
   outline: 'border-2 bg-transparent text-text-primary',
   inverse: 'text-text-primary',
+  // Fully transparent background and keep it transparent on hover
+  ghost: 'bg-transparent text-text-primary hover:bg-transparent',
 };
 
 const sizeStyles: Record<Size, string> = {
@@ -51,10 +52,11 @@ const Button: React.FC<ButtonProps> = ({
   className,
   ...props
 }) => {
-  const style =variantStyles[variant];
+  const style = variantStyles[variant];
 
+  const isGhost = variant === 'ghost';
   const base =
-    `inline-flex items-center justify-center rounded-full font-medium transition-all duration-200 shadow-md focus:outline-none focus:ring-2 focus:ring-app-blue-DEFAULT active:scale-95 gap-2 ${!props.disabled ? 'hover:scale-105' : ''}`;
+    `inline-flex items-center justify-center rounded-full font-medium transition-all duration-200 ${isGhost ? 'shadow-none' : 'shadow-md'} focus:outline-none focus:ring-2 focus:ring-app-blue-DEFAULT active:scale-95 gap-2 ${!props.disabled ? 'hover:scale-105' : ''}`;
 
   return (
     <button

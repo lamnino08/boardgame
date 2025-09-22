@@ -8,16 +8,12 @@ interface NavRightProps {
   userInforPromise: Promise<ApiResponse<AuthCheck>>;
 }
 
-export const NavRight = async ({ userInforPromise } : NavRightProps) => {
+export const NavRight = async ({ userInforPromise }: NavRightProps) => {
   const userInfor = await userInforPromise;
 
   return (
     <div className="flex p-4 space-x-4 items-center">
-      {userInfor.data?.user ? (
-        <NavRightAuthenticated userInfor={userInfor.data.user} />
-      ) : (
-        <NavRightNotAuthenticated />
-      )}
+      <NavRightAuthenticated userInfor={userInfor.data?.user} />
       <ThemeToggle />
     </div>
   );

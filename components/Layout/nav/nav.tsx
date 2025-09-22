@@ -1,6 +1,7 @@
 "use server";
 
 import React from "react";
+import Link from "next/link";
 import { NavRight } from "./nav-right";
 import { NavMiddle } from "./nav-middle";
 import { authCheck } from "@/actions/user";
@@ -12,12 +13,9 @@ export const Navbar: React.FC = async () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16 items-center">
           {/* Logo */}
-          <div
-            className="text-2xl font-bold text-text-primary cursor-pointer"
-            // onClick={() => {}}
-          >
-            My<span className="text-green-500">♥</span>Brand
-          </div>
+          <Link href="/" className="text-2xl font-bold text-text-primary">
+            24<span className="text-green-500">♥</span>News
+          </Link>
 
           <NavMiddle userInforPromise={authen}/>
 

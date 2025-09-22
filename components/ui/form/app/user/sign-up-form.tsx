@@ -1,7 +1,7 @@
 'use client'
 
 import { FormBuilder } from "@/components/FormBuilder/FormBuilder";
-import { useAlert } from "@/contexts/alert-context";
+import { EAlertType, useAlert } from "@/contexts/alert-context";
 import { signupFormConfig, SignUpInput } from "@/constant/form/user/sign-up-form-config";
 import { useState } from "react";
 import { signUp } from "@/actions/user";
@@ -17,17 +17,17 @@ export const SignUpForm = () => {
     setLoading(true);
 
     if (values.password !== values.confirmPassword) {
-      ShowAlert("Passwords do not match", 'error');
+      ShowAlert("Passwords do not match", EAlertType.ERROR);
       setLoading(false);
       return;
     }
 
     const response = await signUp(values);
     if (response.meta.success) {
-      router.push("/sign-in");
+      router.push("/auth/sign-in");
     } else {
       console.log(response.meta.external_message);
-      ShowAlert(response.meta.external_message, 'error');
+      ShowAlert(response.meta.external_message, EAlertType.ERROR);
     }
 
     setLoading(false);

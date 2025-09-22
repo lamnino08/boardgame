@@ -6,6 +6,7 @@ export type Variant =
   | 'warning'
   | 'secondary'
   | 'outline'
-  | 'inverse';
+  | 'inverse'
+  | 'ghost'
 
   export type Size = 'sm' | 'md' | 'lg' | 'icon';

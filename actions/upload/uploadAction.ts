@@ -7,15 +7,14 @@ import { ApiResponse, RequestHelper, EAPIMethod } from "@/lib/api/api-helper";
 /**
  * Upload multiple files
  */
-export const uploadFiles = async (files: File[]): Promise<ApiResponse<string[]>> => {
-  const formData = new FormData();
-  files.forEach((file) => {
-    formData.append("files", file);
-  });
+export const uploadFiles = async (formData: FormData, type: EUploadType, id?: string): Promise<ApiResponse<string[]>> => {
+  if (id) {
+    formData.append("id", id);
+  }
 
   const response = await RequestHelper<string[]>({
     method: EAPIMethod.POST,
-    url: API_ENDPOINTS.upload.uploadMultiple(EUploadType.GRADUATE_MEMORY),
+    url: API_ENDPOINTS.upload.uploadMultiple(type),
     data: formData,
     headers: {
       "Content-Type": "multipart/form-data",

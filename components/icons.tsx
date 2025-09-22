@@ -217,6 +217,12 @@ export const AddIcon = (
   </svg>
 );
 
+export const SubtractIcon = (
+  <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+    <circle cx="12" cy="12" r="10" stroke="currentColor" fill="none" />
+    <line x1="8" y1="12" x2="16" y2="12" />
+  </svg>
+);
 export const GoogleIcon = (
   <svg
     width="20"
@@ -243,11 +249,31 @@ export const GoogleIcon = (
   </svg>
 );
 
+export const EmptyIcon = (
+  <svg
+    width="20"
+    height="20"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    viewBox="0 0 24 24"
+  >
+    <circle cx="12" cy="12" r="10" stroke="currentColor" fill="none" />
+  </svg>
+);
+
+
 
 export const FilterIcon = (
   <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"
   >
     <path d="M4 4h16l-6 8v6l-4 2v-8l-6-8z" stroke="currentColor" fill="none" />
+  </svg>
+);
+
+export const RangeFilterIcon = (
+  <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M8 6h13M8 18h13M3 6h.01M3 18h.01M3 12h18" />
   </svg>
 );
 
@@ -279,8 +305,65 @@ export const Logo = (
   </svg>
 );
 
+export const LogoutIcon = (
+  <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+    <polyline points="16 17 21 12 16 7" />
+    <line x1="21" y1="12" x2="9" y2="12" />
+  </svg>
+);
+
+export const MoonIcon = (
+  <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+  </svg>
+);
+
+export const SunIcon = (
+  <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+    <circle cx="12" cy="12" r="5" />
+    <line x1="12" y1="1" x2="12" y2="3" />
+    <line x1="12" y1="21" x2="12" y2="23" />
+    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+    <line x1="1" y1="12" x2="3" y2="12" />
+    <line x1="21" y1="12" x2="23" y2="12" />
+    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+  </svg>
+);
+
+export const ShareIcon = (
+  <svg
+    width="20"
+    height="20"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    viewBox="0 0 24 24"
+  >
+    <circle cx="18" cy="5" r="3" />
+    <circle cx="6" cy="12" r="3" />
+    <circle cx="18" cy="19" r="3" />
+    <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
+    <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
+  </svg>
+);
 
 
+
+export const SaveIcon = (
+  <svg
+    width="20"
+    height="20"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    viewBox="0 0 24 24"
+  >
+    <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+  </svg>
+);
 
 export default {
   search: SearchIcon,
@@ -312,7 +395,10 @@ export default {
   eyeOff: EyeOffIcon,
   plus: PlusIcon,
   add: AddIcon,
+  sub: SubtractIcon,
   filter: FilterIcon,
   google: GoogleIcon,
-  logo: Logo
+  logo: Logo,
+  empty: EmptyIcon,
+  ràngilter: RangeFilterIcon
 };

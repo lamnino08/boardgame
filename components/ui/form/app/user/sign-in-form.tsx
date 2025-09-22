@@ -4,7 +4,7 @@ import { FormBuilder } from "@/components/FormBuilder/FormBuilder";
 import { login } from "@/actions/user";
 import { useRouter } from "next/navigation";
 import { config, LoginInput } from "@/constant/form/user/login-form-config";
-import { useAlert } from "@/contexts/alert-context";
+import { EAlertType, useAlert } from "@/contexts/alert-context";
 import { useState } from "react";
 
 export const SignInForm = () => {
@@ -19,7 +19,7 @@ export const SignInForm = () => {
     if (response.meta.success) {
       router.push("/");
     } else {
-      showAlert(response.meta.external_message, 'error');
+      showAlert(response.meta.external_message, EAlertType.ERROR);
     }
     setLoading(false);
   };

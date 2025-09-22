@@ -3,7 +3,7 @@ import { BaseInput } from '@/components/FormBuilder/types';
 
 type TextAreaSize = 'sm' | 'md' | 'lg';
 
-interface TextAreaProps extends BaseInput<string> {
+export interface TextAreaProps extends BaseInput<string> {
   label?: string;
   rows?: number;
   placeholder?: string;
@@ -72,16 +72,3 @@ const TextArea: React.FC<TextAreaProps> = ({
 };
 
 export default TextArea;
-
-// Showcase component
-export const TextAreaShowcase = () => (
-  <></>
-  // <Card className="flex flex-col gap-4 p-6">
-  //   {/* <TextArea name='hhh' label="Default TextArea" placeholder="Type something..." />
-  //   <TextArea name='hhh' size="lg" label="Large TextArea" rows={5} />
-  //   <TextArea name='hhh' size="sm" label="Small TextArea" />
-  //   <TextArea name='hhh' label="Readonly" readOnly value="Readonly content" />
-  //   <TextArea name='hhh' label="Disabled" disabled value="Disabled content" />
-  //   <TextArea name='hhh' label="Floating Label" /> */}
-  // </Card>
-);

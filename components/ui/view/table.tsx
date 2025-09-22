@@ -1,13 +1,14 @@
 'use client';
 
 import React, { useState, useRef } from 'react';
-import {Card} from '@/components/ui/Card';
 import { TextInput } from '@/components/ui/form/base-component/text-input';
-import Dropdown from '@/components/ui/form/base-component/dropdown';
-import icons from '@/components/icons';
+import Dropdown, { DropdownOption } from '@/components/ui/form/base-component/dropdown';
+import icons, { RangeFilterIcon } from '@/components/icons';
+import { ESortDirection } from '@/model/common/sortDirection';
+import { SortParam } from './datal-list-view';
 
 export interface Column<T> {
-  key: keyof T | string;
+  key: keyof T; // Đảm bảo key là keyof T
   label: string;
   minWidth?: string;
   maxWidth?: string;
@@ -23,7 +24,7 @@ export interface Column<T> {
 }
 
 export interface ColumnFilter {
-  filterType?: 'text' | 'dropdown';
+  filterType?: 'text' | 'dropdown' | 'range' | 'date-range';
   filterOptions?: { label: string; value: string }[];
 }
 
@@ -32,14 +33,13 @@ interface TableProps<T> {
   data: T[];
   rowKey?: (row: T, index: number) => string | number;
   hoverable?: boolean;
-  click?: {
-    onRowClick: (row: T) => void;
-  };
   dense?: boolean;
   onRowClick?: (row: T) => void;
-  onFilterChange?: (filters: Record<string, string>) => void; // <--- thêm
-  onSortChange?: (sort: { key: string; direction: 'asc' | 'desc' } | null) => void; // <--- thêm
-  loading?: boolean;                  // <--- mặc định false
+  onFilterChange?: (filters: Record<string, string | { from?: string; to?: string; }>) => void; // filter for value or range
+  onSortChange?: (sort: { key: keyof T; direction: ESortDirection } | undefined) => void;
+  loading?: boolean;
+  sort?: SortParam<T> | undefined;
+  emptyState: React.ReactNode
 }
 
 function Table<T>({
@@ -47,30 +47,30 @@ function Table<T>({
   data,
   rowKey,
   hoverable = false,
-  click,
   dense = false,
+  onRowClick,
   onFilterChange,
   onSortChange,
   loading = false,
+  sort,
+  emptyState,
 }: TableProps<T>) {
-  const [sortConfig, setSortConfig] = useState<{ key: keyof T | string; direction: 'asc' | 'desc' } | null>(null);
-  const [filters, setFilters] = useState<Record<string, string>>({});
+  const [filters, setFilters] = useState<Record<string, string | { from?: string; to?: string; }>>({});
   const [visibleFilters, setVisibleFilters] = useState<Record<string, boolean>>({});
   const debounceRef = useRef<Record<string, NodeJS.Timeout>>({});
 
-  const handleSort = (key: keyof T | string) => {
-    let newConfig: typeof sortConfig = null;
-    if (!sortConfig || sortConfig.key !== key) {
-      newConfig = { key, direction: 'asc' };
-    } else if (sortConfig.direction === 'asc') {
-      newConfig = { key, direction: 'desc' };
+  const handleSort = (key: keyof T) => {
+    let newConfig: typeof sort = undefined;
+    if (!sort || sort.key !== key) {
+      newConfig = { key, direction: ESortDirection.ASC };
+    } else if (sort.direction === ESortDirection.ASC) {
+      newConfig = { key, direction: ESortDirection.DESC };
     }
-    setSortConfig(newConfig);
-    onSortChange?.(newConfig ? { key: String(newConfig.key), direction: newConfig.direction } : null);
+    onSortChange?.(newConfig);
   };
 
   // Xử lý thay đổi filters in cho dropdown và text input in columns
-  const handleFilterChange = (key: string, value: string) => {
+  const handleFilterChange = (key: string, value: string | { from?: string; to?: string; }) => {
     setFilters((prev) => {
       const updated = { ...prev, [key]: value };
 
@@ -95,7 +95,7 @@ function Table<T>({
   const displayData = data;
 
   return (
-    <div className="overflow-x-auto rounded-lg shadow-md">
+    <div className="overflow-visible rounded-lg shadow-md">
       <table className="min-w-full bg-background">
         <thead>
           <tr>
@@ -119,8 +119,8 @@ function Table<T>({
                           className="ml-1 text-xs text-neutral-400 cursor-pointer"
                           onClick={() => handleSort(col.key)}
                         >
-                          {sortConfig?.key === col.key
-                            ? sortConfig.direction === 'asc'
+                          {sort?.key === col.key
+                            ? sort.direction === 'asc'
                               ? '▲'
                               : '▼'
                             : '⇅'}
@@ -134,7 +134,13 @@ function Table<T>({
                             toggleFilter(String(col.key));
                           }}
                         >
-                          {col.filter.filterType === 'dropdown' ? icons.filter : icons.search}
+                          {
+                            col.filter.filterType === 'dropdown'
+                              ? icons.filter // Biểu tượng cho dropdown
+                              : col.filter.filterType === 'date-range' || col.filter.filterType === 'range'
+                                ? RangeFilterIcon
+                                : icons.search
+                          }
                         </button>
                       )}
                     </div>
@@ -146,14 +152,62 @@ function Table<T>({
                           placeholder="All"
                           size="sm"
                           options={col.filter.filterOptions}
-                          // onSelect={(val) => handleFilterChange(String(col.key), val)}
+                          onChange={(val) => handleFilterChange(String(col.key), val)}
                         />
+                      ) : col.filter.filterType === 'range' ? (
+                        <div className="flex gap-1">
+                          <TextInput
+                            size="sm"
+                            type="number"
+                            placeholder="Min"
+                            value={(filters[String(col.key)] as { from: string })?.from || ''}
+                            onChange={(val) => {
+                              const currentFilter = (filters[String(col.key)] || {}) as { from?: string; to?: string; };
+                              handleFilterChange(String(col.key), { from: val, to: currentFilter.to });
+                            }}
+                          />
+                          <TextInput
+                            size="sm"
+                            type="number"
+                            placeholder="Max"
+                            value={(filters[String(col.key)] as { to: string })?.to || ''}
+                            onChange={(val) => {
+                              const currentFilter = (filters[String(col.key)] || {}) as { from?: string; to?: string; };
+                              handleFilterChange(String(col.key), { from: currentFilter.from, to: val });
+                            }}
+                          />
+                        </div>
+                      ) : col.filter.filterType === 'date-range' ? (
+                        <div className="flex gap-1">
+                          <TextInput
+                            size="sm"
+                            type="date"
+                            placeholder="From"
+                            value={(filters[String(col.key)] as { from: string })?.from || ''}
+                            // value={filters[String(col.key)]?.split(',')[0] || ''}
+                            onChange={(val) => {
+                              const currentFilter = (filters[String(col.key)] || {}) as { from?: string; to?: string; };
+                              handleFilterChange(String(col.key), { from: val, to: currentFilter.to });
+                            }}
+                          />
+                          <TextInput
+                            size="sm"
+                            type="date"
+                            placeholder="To"
+                            value={(filters[String(col.key)] as { to: string })?.to || ''}
+                            // value={filters[String(col.key)]?.split(',')[1] || ''}
+                            onChange={(val) => {
+                              const currentFilter = (filters[String(col.key)] || {}) as { from?: string; to?: string; };
+                              handleFilterChange(String(col.key), { from: currentFilter.from, to: val });
+                            }}
+                          />
+                        </div>
                       ) : (
                         <TextInput
                           size="sm"
                           placeholder="Search"
-                          value={filters[String(col.key)] || ''}
-                          // onChange={(e) => handleFilterChange(String(col.key), e.target.value)}
+                          value={filters[String(col.key)] as string || ''}
+                          onChange={(val) => handleFilterChange(String(col.key), val)}
                         />
                       )}
                     </>
@@ -171,12 +225,18 @@ function Table<T>({
                 Loading...
               </td>
             </tr>
+          ) : data.length === 0 ? (
+            <tr>
+              <td colSpan={columns.length} className="py-4">
+                {emptyState ? emptyState : <div className="text-center">No data available</div>}
+              </td>
+            </tr>
           ) : (
             displayData.map((row, rowIndex) => (
               <tr
                 key={rowKey ? rowKey(row, rowIndex) : rowIndex}
-              onClick={() => { click && click.onRowClick(row)}}
-                className={`${hoverable ? 'hover:bg-card' : ''} ${click ? 'cursor-pointer' : ''}`}
+                onClick={() => { onRowClick?.(row) }}
+                className={`${hoverable ? 'hover:bg-card' : ''} ${onRowClick ? 'cursor-pointer' : ''}`}
               >
                 {columns
                   .filter((col) => col.condition !== false)
@@ -213,153 +273,3 @@ function Table<T>({
 }
 
 export default Table;
-
-
-interface User {
-  id: number;
-  name: string;
-  email: string;
-  age: number;
-  role: string;
-}
-
-const sampleData: User[] = [
-  { id: 1, name: 'John Doe', email: 'john@example.com', age: 28, role: 'Developer' },
-  { id: 2, name: 'Jane Smith', email: 'jane@example.com', age: 32, role: 'Designer' },
-  { id: 3, name: 'Mike Brown', email: 'mike@example.com', age: 40, role: 'Manager' },
-  { id: 4, name: 'Anna Lee', email: 'anna@example.com', age: 24, role: 'Intern' },
-  { id: 5, name: 'Chris Green', email: 'chris@example.com', age: 35, role: 'QA' },
-  { id: 6, name: 'Sarah White', email: 'sarah@example.com', age: 29, role: 'Product Owner' },
-];
-
-const userColumns: Column<User>[] = [
-  {
-    key: 'name', label: 'Name', sortable: true, truncate: true,
-    filter: { filterType: 'text' },
-    render: (row) => <span className="text-primary">{row.name}</span>
-  },
-  { key: 'email', label: 'Email', minWidth: '200px', truncate: true, filter: { filterType: 'text' } },
-  { key: 'age', label: 'Age', sortable: true, align: 'center', width: '80px' },
-  {
-    key: 'role',
-    label: 'Role',
-    align: 'center',
-    filter: {
-      filterType: 'dropdown', filterOptions: [
-        { label: 'All', value: '' },
-        { label: 'Developer', value: 'Developer' },
-        { label: 'Designer', value: 'Designer' },
-        { label: 'Manager', value: 'Manager' },
-        { label: 'Intern', value: 'Intern' },
-        { label: 'QA', value: 'QA' },
-        { label: 'Product Owner', value: 'Product Owner' },
-      ]
-    }
-  },
-  {
-    key: 'actions',
-    label: 'Actions',
-    align: 'right',
-    render: (row) => (
-      <button className="text-app-blue-DEFAULT hover:underline" onClick={() => alert(row.name)}>
-        View
-      </button>
-    ),
-  },
-];
-
-
-export const TableShowcase = () => {
-  const [page, setPage] = useState(1);
-  const pageSize = 3;
-  const paginatedData = sampleData.slice((page - 1) * pageSize, page * pageSize);
-  const totalPages = Math.ceil(sampleData.length / pageSize);
-
-  return (
-    <div className="space-y-8">
-      {/* 1. Basic Table */}
-      <Card>
-        <h3 className="text-lg font-semibold text-text-primary mb-4">Basic Table</h3>
-        <Table columns={userColumns} data={sampleData} rowKey={(row) => row.id} />
-      </Card>
-
-      {/* 2. Hoverable Table */}
-      <Card>
-        <h3 className="text-lg font-semibold text-text-primary mb-4">Hoverable Table</h3>
-        <Table columns={userColumns} data={sampleData} rowKey={(row) => row.id} hoverable />
-      </Card>
-
-      {/* 3. Clickable Table */}
-      <Card>
-        <h3 className="text-lg font-semibold text-text-primary mb-4">Clickable Table</h3>
-        <Table
-          columns={userColumns}
-          data={sampleData}
-          rowKey={(row) => row.id}
-          click={{
-            onRowClick: (row) => alert(`Clicked on ${row.name}`),
-          }}
-          hoverable
-        />
-      </Card>
-
-      {/* 4. Dense Table */}
-      <Card>
-        <h3 className="text-lg font-semibold text-text-primary mb-4">Dense Table</h3>
-        <Table columns={userColumns} data={sampleData} rowKey={(row) => row.id} dense hoverable />
-      </Card>
-
-      {/* 5. Sortable Table */}
-      <Card>
-        <h3 className="text-lg font-semibold text-text-primary mb-4">Sortable Table</h3>
-        <Table columns={userColumns} data={sampleData} rowKey={(row) => row.id} hoverable />
-      </Card>
-
-      {/* 6. Paginated Table */}
-      <Card>
-        <h3 className="text-lg font-semibold text-text-primary mb-4">Paginated Table</h3>
-        <Table columns={userColumns} data={paginatedData} rowKey={(row) => row.id} hoverable />
-        <div className="flex justify-between items-center mt-3">
-          <button
-            className="px-3 py-1 bg-neutral-800 text-white rounded disabled:opacity-50"
-            disabled={page === 1}
-            onClick={() => setPage((p) => p - 1)}
-          >
-            Prev
-          </button>
-          <span className="text-sm">
-            Page {page} / {totalPages}
-          </span>
-          <button
-            className="px-3 py-1 bg-neutral-800 text-white rounded disabled:opacity-50"
-            disabled={page === totalPages}
-            onClick={() => setPage((p) => p + 1)}
-          >
-            Next
-          </button>
-        </div>
-      </Card>
-
-      {/* 7. Sticky Header Table */}
-      <Card>
-        <h3 className="text-lg font-semibold text-text-primary mb-4">Sticky Header Table</h3>
-        <div className="max-h-64 overflow-y-auto">
-          <Table
-            columns={userColumns}
-            data={sampleData}
-            rowKey={(row) => row.id}
-            hoverable
-          />
-        </div>
-        <style jsx>{`
-          table thead th {
-            position: sticky;
-            top: 0;
-            background: var(--background-surface, #111);
-            z-index: 1;
-          }
-        `}</style>
-      </Card>
-    </div>
-  );
-};

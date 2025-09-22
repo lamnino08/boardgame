@@ -1,17 +1,19 @@
+import { Metadata } from 'next';
 import { authCheck } from "@/actions/user";
 import { HomePageClient } from "./_component/page-client";
 import { LandingPage } from "./_component/landing-page"; // Tạo riêng component landing
+import { ListPost } from "@/components/app/dashboard/tst/post/listPost";
+
+export const metadata: Metadata = {
+  title: 'Home',
+};
 
 export default async function Home() {
-  const res = await authCheck();
+  const res = authCheck();
 
   return (
-    <main className="flex flex-col items-center justify-center bg-background px-4">
-      {res.data?.user ? (
-        <HomePageClient userInforPromise={Promise.resolve(res)} />
-      ) : (
-        <LandingPage />
-      )}
-    </main>
+    <div className="flex flex-col max-w-7xl mx-auto">
+      <ListPost userInforPromise={res}/>
+    </div>
   );
 }

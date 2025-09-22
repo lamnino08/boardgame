@@ -9,5 +9,8 @@ export interface User {
   updated_at: string;
 }
 
-export type UserRole = 'admin' | 'user';
+export enum UserRole {
+  Admin = 'admin',
+  User = 'user'
+}
 

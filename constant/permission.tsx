@@ -47,25 +47,15 @@ export const pageRoutes: Record<string, PageRoute> = {
             }
         },
     },
-    // graduate: {
-    //     path: "/graduate",
-    //     CheckPermission: async (request) => {
-    //         const guestAuth = await guestAuthCheck();
-    //         if (guestAuth.isAuthenticated) {
-    //             return NextResponse.redirect(new URL("/graduate/letter", request?.url));
-    //         }
-    //     }
-    // },
-    // graduate_in: {
-    //     path: "/graduate/letter",
-    //     CheckPermission: async (request) => {
-    //         const guestAuth = await guestAuthCheck();
-    //         if (!guestAuth.isAuthenticated) {
-    //             console.log("herer");
-    //             return NextResponse.redirect(new URL("/graduate", request?.url));
-    //         }
-    //     }
-    // }
+    finance: {
+        path: "/finance/:path*",
+        CheckPermission: async (request) => {
+            const auth = await AuthCheck();
+            if (!auth.isAuthenticated) {
+                return NextResponse.redirect(new URL("/auth/sign-in", request?.url));
+            }   
+        },
+    }
 };
 
 /**
@@ -76,14 +66,27 @@ export const pageRoutes: Record<string, PageRoute> = {
 const createRouteRegex = (path: string) => {
     const paramNames: { name: string; isWildcard: boolean }[] = [];
 
+    const wildcardEndMatch = path.match(/^(.*)\/:([^/*]+)\*$/);
+    if (wildcardEndMatch) {
+        const base = wildcardEndMatch[1];
+        const paramName = wildcardEndMatch[2];
+        paramNames.push({ name: paramName, isWildcard: true });
+        const regexPath = `${base}(?:\/(.*))?`;
+        return {
+            regex: new RegExp(`^${regexPath}$`),
+            paramNames,
+        };
+    }
+
+    // Mặc định như cũ
     const regexPath = path.replace(/:([^/*]+)(\*)?/g, (_, paramName, isWildcard) => {
         paramNames.push({ name: paramName, isWildcard: Boolean(isWildcard) });
         return isWildcard ? "(.*)" : "([^/]+)";
     });
 
     return {
-        regex: new RegExp(`^${regexPath}$`), // Full regex for matching
-        paramNames, // List of parameters with information on whether they are wildcards
+        regex: new RegExp(`^${regexPath}$`),
+        paramNames,
     };
 };
 
@@ -107,7 +110,6 @@ export const checkPagePermission = async (
         if (match) {
             // console.log("Matched Route:", route.path);
 
-            // Extract parameters
             const params = paramNames.reduce<Record<string, string>>((acc, { name }, index) => {
                 acc[name] = match[index + 1];
                 return acc;
@@ -115,7 +117,6 @@ export const checkPagePermission = async (
 
             // console.log("Extracted Params:", params);
 
-            // Check permissions for the matched route
             const response = await route.CheckPermission(request, params);
             if (response instanceof NextResponse) {
                 return response;

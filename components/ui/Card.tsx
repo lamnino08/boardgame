@@ -30,7 +30,7 @@ export const Card: React.FC<CardProps> = ({ title, children, className, onClick 
       ref={cardRef}
       onMouseMove={handleMouseMove}
       className={cn(
-        "relative bg-card backdrop-blur-md border border-border w-full flex flex-col rounded-3xl shadow-lg p-8 transition hover:shadow-xl overflow-hidden group",
+        "relative bg-card backdrop-blur-md border border-border w-full flex flex-col rounded-3xl shadow-lg p-6 transition hover:shadow-xl overflow-hidden group",
         className
       )}
     >

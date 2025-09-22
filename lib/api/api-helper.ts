@@ -1,7 +1,7 @@
 import axios, { AxiosRequestConfig } from "axios";
 import { cookies, headers } from "next/headers";
-import { z } from "zod";
 import Log from "../log";
+import { ZodIssue } from "zod";
 
 export interface ApiResponse<T> {
   meta: {
@@ -28,9 +28,15 @@ export async function RequestHelper<T>(params: {
   url: string,
   data?: any,
   headers?: Record<string, string>,
+  validationSchema?: any,
 }
 ): Promise<ApiResponse<T>> {
   try {
+    // Validate data if validationSchema is provided
+    if (params.validationSchema && params.data) {
+      params.validationSchema.parse(params.data);
+    }
+
     const cookieStore = await cookies();
     const token = cookieStore.get("token")?.value;
     const lang = cookieStore.get("lang")?.value || "en";
@@ -43,21 +49,35 @@ export async function RequestHelper<T>(params: {
       headers: {
         Authorization: token ? `Bearer ${token}` : "",
         "Accept-Language": lang,
-        ...headers,
+        ...params.headers,
       },
       data: params.data,
       timeout: 5000,
     };
-    Log.info('api-helper', 'RequestHelper', `URL: ${params.url}; data: ${JSON.stringify(params.data)}`);
+
+    // Log.info('api-helper', 'RequestHelper', `
+    //   METHOD: ${params.method} 
+    //   URL: ${fullUrl}; 
+    //   data: ${JSON.stringify(params.data, null, 2)}
+    // `)
+
     const response = await axios<ApiResponse<T>>(config);
 
-    Log.info('api-helper', 'RequestHelper', `URL: ${params.url}; response: ${JSON.stringify(response.data.data)} `)
+    Log.info('api-helper', 'RequestHelper', `
+      METHOD: ${params.method} 
+      URL: ${fullUrl}; 
+      data: ${JSON.stringify(params.data, null, 2)}
+      response: ${JSON.stringify(response.data, null, 2)} 
+    `)
     return response.data;
   } catch (error: any) {
     let external_message = "An unexpected error occurred";
     let internal_message = error.message || "Unknown error";
 
-    if (error.response) {
+    if (error.name === "ZodError") {
+      external_message = error.errors.map((e: any) => e.message).join(", ");
+      internal_message = "Validation failed";
+    } else if (error.response) {
       const status = error.response.status;
       external_message =
         error.response.data?.meta?.external_message ||

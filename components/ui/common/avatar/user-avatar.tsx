@@ -3,11 +3,11 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Avatar from '@/components/ui/common/avatar/avatar';
-import { Card} from '@/components/ui/Card';
+import { Card } from '@/components/ui/Card';
 import { AuthCheck } from '@/lib/auth';
-import { LogOutIcon, SettingsIcon, UserIcon } from 'lucide-react';
 import Button from '../button/button';
 import { logout } from '@/actions/user';
+import { LogoutIcon } from '@/components/icons';
 
 interface UserDropdownProps {
   user: AuthCheck['user']; // user có { username, email, ... }
@@ -47,29 +47,21 @@ const UserDropdown: React.FC<UserDropdownProps> = ({ user }) => {
 
       {isOpen && (
         <div className='absolute right-0 mt-2 w-60 z-50'>
-          <Card className="p-4">
-            <Button
-              onClick={() => router.push('/profile')}
-              variant='inverse'
-            >
-              <UserIcon className="w-4 h-4" />
-              My Profile
-            </Button>
-
-            <Button
+          <Card className="px-2">
+            {/* <Button
               onClick={() => router.push('/settings')}
               variant='inverse'
             >
               <SettingsIcon className="w-4 h-4" />
               Settings
-            </Button>
+            </Button> */}
 
             <Button
               onClick={handleLogout}
               className="!text-danger"
               variant='inverse'
             >
-              <LogOutIcon className="w-4 h-4" />
+              {LogoutIcon}
               Logout
             </Button>
           </Card>

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { CheckIcon, MinusIcon, DotIcon } from '@/components/icons';
 import {Card} from '../../Card';
 import { BaseInput } from '@/components/FormBuilder/types';
+import Toggle from './toggle'; // Import the new Toggle component
 
 interface CheckboxProps extends BaseInput<boolean> {
   checked?: boolean;
@@ -50,7 +51,7 @@ export const Checkbox: React.FC<CheckboxProps> = ({
       />
       <span
         onClick={handleChange}
-          className={`w-5 h-5 rounded-md border bg-background flex items-center justify-center transition-all duration-150 ${internalChecked || indeterminate ? `${colorClasses[color]} text-${colorClasses[color]}` : 'border-boder text-text-secondary'
+          className={`w-5 h-5 rounded-md border bg-background flex items-center justify-center transition-all duration-150 ${internalChecked || indeterminate ? `${colorClasses[color]}` : 'border-boder text-text-secondary'
           }`}
       >
         {indeterminate ? MinusIcon : internalChecked ? CheckIcon : null}
@@ -124,58 +125,6 @@ export const Radio: React.FC<RadioProps> = ({
   );
 };
 
-// ----- SWITCH -----
-interface SwitchProps extends BaseInput<boolean> {
-  color?: 'blue' | 'red';
-}
-
-export const Switch: React.FC<SwitchProps> = ({
-  label,
-  value = false,
-  disabled = false,
-  color = 'blue',
-  onChange,
-  className,
-}) => {
-  const [internalChecked, setInternalChecked] = useState(value);
-
-  const handleToggle = () => {
-    if (disabled) return;
-    const newVal = !internalChecked;
-    setInternalChecked(newVal);
-    onChange?.(newVal);
-  };
-
-  const gradientClasses = {
-    blue: internalChecked ? 'bg-gradient-to-r from-app-blue-light to-app-blue-DEFAULT' : 'bg-disabled',
-    red: internalChecked ? 'bg-gradient-to-r from-app-red-light to-app-red-DEFAULT' : 'bg-disabled',
-  };
-
-  return (
-    <label
-      className={`flex items-center space-x-4 cursor-pointer select-none transition-all duration-150 ${disabled ? 'opacity-50 cursor-not-allowed' : ''
-        } ${className || ''}`}
-    >
-      <div
-        onClick={handleToggle}
-        className={`relative w-12 h-6 rounded-full transition-colors duration-200 ${gradientClasses[color]}`}
-      >
-        <span
-          className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow flex items-center justify-center transform transition-transform duration-300 ${internalChecked ? 'translate-x-6' : ''
-            }`}
-        >
-          {internalChecked && (
-            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-              <polyline points="20 6 9 17 4 12" />
-            </svg>
-          )}
-        </span>
-      </div>
-      {label && <span className="text-text-primary text-sm">{label}</span>}
-    </label>
-  );
-};
-
 // ----- SHOWCASE -----
 export const MultipleOptionShowCase = () => {
   const [radioValue, setRadioValue] = useState('1');
@@ -212,12 +161,12 @@ export const MultipleOptionShowCase = () => {
       </div>
 
       <div>
-        <div className="text-app-red-light font-semibold mb-3 text-lg">Switches</div>
-        <Switch label="Default switch checkbox input" />
-        <Switch label="Checked switch checkbox input" value={false} color="blue" />
-        <Switch label="Checked switch checkbox input" value={true} color="red" />
-        <Switch label="Disabled switch checkbox input" disabled />
-        <Switch label="Disabled checked switch checkbox input" disabled />
+        <div className="text-app-red-light font-semibold mb-3 text-lg">Toggles</div>
+        <Toggle label="Default toggle checkbox input" />
+        <Toggle label="Checked toggle checkbox input" value={false} color="blue" />
+        <Toggle label="Checked toggle checkbox input" value={true} color="red" />
+        <Toggle label="Disabled toggle checkbox input" disabled />
+        <Toggle label="Disabled checked toggle checkbox input" disabled />
       </div>
     </Card>
   );

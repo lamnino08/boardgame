@@ -1,24 +1,37 @@
 'use client'
 
-import React, { useState } from 'react';
-import {Card} from '@/components/ui/Card';
+import React, { useState, useRef, useEffect } from 'react';
 import { BaseInput } from '@/components/FormBuilder/types';
-import { sizeClasses } from '@/components/ui/form/base-component/text-input';
+import { InputSize } from './text-input';
+
+export interface DropdownOption<T = string> {
+  label: string;
+  value: T;
+  className?: string;
+  render?: () => React.ReactNode;
+  action?: React.ReactNode; // New: action for each option
+}
+
+export const sizeClasses: Record<InputSize, string> = {
+  sm: 'text-sm py-[7px] px-3',
+  md: 'text-base py-2 px-4',
+  lg: 'text-lg py-2.5 px-5',
+};
 
 type DropdownSize = 'sm' | 'md' | 'lg';
 
-interface DropdownOption {
-  label: string;
-  value: string;
-}
-
-export interface DropdownProps extends BaseInput<string> {
-  options: DropdownOption[];
+export interface DropdownProps<T = string> extends BaseInput<T> {
+  options: DropdownOption<T>[];
   label?: string;
   placeholder?: string;
+  size?: DropdownSize;
+  className?: string;
+  disabled?: boolean;
+  onBlur?: () => void;
+  buttonRender?: React.ReactNode;
 }
 
-const Dropdown: React.FC<DropdownProps> = ({
+function Dropdown<T = string>({
   options,
   onChange,
   placeholder = 'Select an option',
@@ -27,43 +40,61 @@ const Dropdown: React.FC<DropdownProps> = ({
   className,
   value,
   disabled,
-}) => {
+  onBlur,
+  buttonRender,
+}: DropdownProps<T>) {
   const [isOpen, setIsOpen] = useState(false);
-  const [internalValue, setInternalValue] = useState<string>(value || '');
+  const [internalValue, setInternalValue] = useState<T | undefined>(value);
+
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const selectedOption = options.find((opt) => opt.value === (value ?? internalValue));
 
-  const handleSelect = (val: string) => {
+  const handleSelect = (val: T) => {
     setInternalValue(val);
     onChange?.(val);
     setIsOpen(false);
   };
 
-  const hasValue = Boolean(selectedOption);
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    if (isOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isOpen]);
 
   return (
-    <div className={`relative w-full ${className || ''}`}>
-      {/* Normal Label (non-floating) */}
-      {label && (
-        <label className="form-label">{label}</label>
-      )}
+    <div
+      ref={dropdownRef}
+      className={`relative w-full ${className || ''}`}
+      tabIndex={0}
+      onBlur={onBlur}
+    >
+      {label && <label className="form-label">{label}</label>}
 
-      {/* Trigger Button */}
       <button
+        type="button"
         disabled={disabled}
         onClick={() => setIsOpen(!isOpen)}
-        className={`
-          input-field
-          ${sizeClasses[size]}
-          flex justify-between items-center px-2 
-          ${selectedOption ? 'text-text-primary' : 'text-text-secondary'}
-        `}
+        className={
+          `input-field ${sizeClasses[size]} flex justify-between items-center px-2 ` +
+          (selectedOption ? `text-text-primary ${selectedOption.className}`  : 'text-text-secondary')
+        }
       >
-        {selectedOption?.label || placeholder}
-
+        {buttonRender ? (
+          buttonRender
+        ) : (
+          selectedOption?.label || placeholder
+        )}
         <svg
-          className={`ml-2 h-4 w-4 text-neutral-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : 'rotate-0'
-            }`}
+          className={`ml-2 h-4 w-4 text-neutral-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : 'rotate-0'}`}
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 20 20"
           fill="currentColor"
@@ -76,51 +107,31 @@ const Dropdown: React.FC<DropdownProps> = ({
         </svg>
       </button>
 
-      {/* Dropdown List */}
       {isOpen && (
-        <div
-          className="
-            absolute top-full left-0 mt-1 w-full rounded-xl shadow-lg
-            bg-background border border-border z-50
-          "
-        >
+        <div className="absolute top-full left-0 mt-1 w-full rounded-xl shadow-lg bg-background border border-border z-50 overflow-hidden">
           {options.map((option) => (
-            <button
-              key={option.value}
-              onClick={() => handleSelect(option.value)}
-              className="
-                block w-full text-left px-4 py-2 text-sm text-text-primary
-                hover:bg-card transition-colors
-              "
-            >
-              {option.label}
-            </button>
+            <div key={String(option.value)} className="flex items-center">
+              <button
+                type="button"
+                onClick={() => handleSelect(option.value)}
+                className={`block w-full text-left ${sizeClasses[size]} text-text-primary hover:bg-card ${option.className || ''}`}
+              >
+                {option.render ? option.render() : option.label}
+              </button>
+              {option.action && (
+                <span
+                  className="ml-2 flex-shrink-0 cursor-pointer"
+                  onClick={e => { e.stopPropagation(); /* custom action handler if needed */ }}
+                >
+                  {option.action}
+                </span>
+              )}
+            </div>
           ))}
         </div>
       )}
-
     </div>
   );
-};
+}
 
 export default Dropdown;
-
-// Showcase
-export const DropdownShowcase = () => {
-  const [selected, setSelected] = useState('');
-  const options = [
-    { label: 'Option A', value: 'a' },
-    { label: 'Option B', value: 'b' },
-    { label: 'Option C', value: 'c' },
-  ];
-
-  return (
-    <></>
-    // <Card className="flex flex-col gap-4 p-6">
-    //   <Dropdown name='hhh' label="Small Dropdown" size="sm" options={options} onChange={setSelected} placeholder="Pick one" />
-    //   <Dropdown name='hhh' label="Medium Dropdown" options={options} onChange={setSelected} placeholder="Pick color" />
-    //   <Dropdown name='hhh' label="Large Dropdown" size="lg" options={options} onChange={setSelected} placeholder="Choose size" />
-    //   <Dropdown name='hhh' label="Floating Dropdown" options={options} onChange={setSelected} />
-    // </Card>
-  );
-};

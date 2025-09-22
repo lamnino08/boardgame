@@ -3,6 +3,7 @@ import Dropdown, { DropdownProps } from "@/components/ui/form/base-component/dro
 import { TextInput, TextInputProps } from "@/components/ui/form/base-component/text-input";
 import { ColorPicker, ColorPickerProps } from "@/components/ui/form/base-component/color-pick"
 import { BaseInput } from "@/components/FormBuilder/types";
+import TextArea, { TextAreaProps } from "@/components/ui/form/base-component/text-area";
 
 export abstract class FieldFactory<TProps extends BaseInput> {
   protected schema?: ZodSchema<TProps["value"]>;
@@ -76,5 +77,11 @@ export class DropdownFieldFactory extends FieldFactory<DropdownProps> {
 export class ColorSelectFieldFactory extends FieldFactory<ColorPickerProps> {
   render(error?: string): React.ReactNode {
     return this.renderField(ColorPicker, error);
+  }
+}
+
+export class AreaTextFieldFactory extends FieldFactory<TextAreaProps> {
+  render(error?: string): React.ReactNode {
+    return this.renderField(TextArea, error);
   }
 }

@@ -11,9 +11,13 @@ interface RootLayoutProps {
 export default async function RootLayout({ children }: RootLayoutProps) {
 
   return (
-    <div className="flex min-h-screen pt-16 flex-col">
+    <div className="flex flex-col min-h-screen">
       <Navbar />
-      {children}
+      <main className="flex-1 pt-20 items-center">
+        <div className="flex flex-col items-center max-w-2xl mx-auto">
+          {children}
+        </div>
+      </main>
       <Footer />
     </div>
   );

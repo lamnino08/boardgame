@@ -27,6 +27,7 @@ export interface BaseInput<T = any> {
   readOnly?: boolean;
   onChange?: (value: T) => void;
   className?: string;
+  inputRef?: React.Ref<HTMLInputElement>;
 }
 
 // -------------------------
@@ -44,9 +45,11 @@ export type ExtractFieldValue<T> = T extends FieldFactory<infer P>
   ? P["value"]
   : never;
 
-export type ExtractFormValues<TFields> = {
-  [K in keyof TFields]: ExtractFieldValue<TFields[K]>;
-};
+export type ExtractFormValues<TFormConfig> = TFormConfig extends FormConfig<infer TFields>
+  ? {
+      [K in keyof TFields]: ExtractFieldValue<TFields[K]>;
+    }
+  : never;
 
 export interface FormConfig<TFields extends Record<string, FieldFactory<any>>> {
   title?: {
