@@ -23,7 +23,7 @@ export async function generateMetadata(
   }
  
   return {
-    title: post.data.title,
+    title: post.data.name || 'Post'
   }
 }
 
