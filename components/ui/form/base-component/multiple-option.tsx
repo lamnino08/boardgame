@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { CheckIcon, MinusIcon, DotIcon } from '@/components/icons';
 import {Card} from '../../Card';
 import { BaseInput } from '@/components/FormBuilder/types';
-import Toggle from './toggle'; // Import the new Toggle component
 
 interface CheckboxProps extends BaseInput<boolean> {
   checked?: boolean;
@@ -122,52 +121,5 @@ export const Radio: React.FC<RadioProps> = ({
         );
       })}
     </div>
-  );
-};
-
-// ----- SHOWCASE -----
-export const MultipleOptionShowCase = () => {
-  const [radioValue, setRadioValue] = useState('1');
-
-  return (
-    <Card>
-      <div>
-        <div className="text-app-blue-light font-semibold mb-3 text-lg">Checkboxes</div>
-        <Checkbox label="Default checkbox" />
-        <Checkbox label="Checked checkbox" checked color="blue" />
-        <Checkbox label="Indeterminate checkbox" indeterminate color="purple" />
-        <Checkbox label="Disabled checkbox" disabled />
-        <Checkbox label="Disabled checked checkbox" checked disabled />
-      </div>
-
-      <div>
-        <div className="text-app-purple-light font-semibold mb-3 text-lg">Radios</div>
-
-        {/* Radio mặc định */}
-        <Radio
-          label="Default radio"
-          name="demo"
-          value={radioValue}
-          onChange={setRadioValue}
-          options={[
-            { label: 'Option 1', value: '1' },
-            { label: 'Option 2', value: '2' },
-            { label: 'Option 3', value: '3' },
-            { label: 'Option 4', value: '4' },
-            { label: 'Option 5', value: '5' },
-          ]}
-          color="blue"
-        />
-      </div>
-
-      <div>
-        <div className="text-app-red-light font-semibold mb-3 text-lg">Toggles</div>
-        <Toggle label="Default toggle checkbox input" />
-        <Toggle label="Checked toggle checkbox input" value={false} color="blue" />
-        <Toggle label="Checked toggle checkbox input" value={true} color="red" />
-        <Toggle label="Disabled toggle checkbox input" disabled />
-        <Toggle label="Disabled checked toggle checkbox input" disabled />
-      </div>
-    </Card>
   );
 };
